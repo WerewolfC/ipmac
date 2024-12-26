@@ -46,7 +46,7 @@ class Gui(ttk.Window):
         btn_search = ttk.Button(master=search_frame,
                                 text="Search",
                                 width=10,
-                                bootstyle="secondary")
+                                bootstyle="primary")
         btn_search.pack(side="right", padx=5, pady=5, anchor="w")
         search_frame.pack(side="top", expand=False, fill="both", padx=5, pady=5)
 
@@ -59,17 +59,17 @@ class Gui(ttk.Window):
                                     text="+",
                                     width=5,
                                     command=self._cb_add_device,
-                                    bootstyle="secondary")
+                                    bootstyle="primary")
         btn_rem_device = ttk.Button(master=device_frame,
                                     text="-",
                                     width=5,
                                     command=self._cb_rem_device,
-                                    bootstyle="secondary")
+                                    bootstyle="primary")
         btn_edit_device = ttk.Button(master=device_frame,
                                      text="...",
                                      width=5,
                                      command=self._cb_edit_device,
-                                     bootstyle="secondary")
+                                     bootstyle="primary")
         btn_add_device.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_device.pack(side="left", padx=5, pady=5, anchor="w")
         btn_edit_device.pack(side="left", padx=5, pady=5, anchor="w")
@@ -93,24 +93,24 @@ class Gui(ttk.Window):
                                 text="+",
                                 width=5,
                                 command=self._cb_add_if,
-                                bootstyle="secondary")
+                                bootstyle="primary")
         btn_rem_if = ttk.Button(master=info_frame,
                                 text="-",
                                 width=5,
-                                bootstyle="secondary")
+                                bootstyle="primary")
         btn_edit_if = ttk.Button(master=info_frame,
                                  text="...",
                                  width=5,
                                  command=self._cb_edit_if,
-                                 bootstyle="secondary")
+                                 bootstyle="primary")
         btn_copy_mac = ttk.Button(master=info_frame,
                                   text="cp MAC",
                                   width=5,
-                                  bootstyle="secondary")
+                                  bootstyle="primary")
         btn_copy_ip = ttk.Button(master=info_frame,
                                  text="cp IP",
                                  width=5,
-                                 bootstyle="secondary")
+                                 bootstyle="primary")
         btn_add_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_edit_if.pack(side="left", padx=5, pady=5, anchor="w")
@@ -195,17 +195,17 @@ class WindowAddDevice(ttk.Toplevel):
         btn_save = ttk.Button(master=frm_buttons,
                               text="Save",
                               command=self._callback_save,
-                              bootstyle="secondary")
+                              bootstyle="primary")
         btn_clear = ttk.Button(master=frm_buttons,
                                text="Clear",
                                width=5,
                                command=self._callback_clear,
-                               bootstyle="secondary")
+                               bootstyle="primary")
         btn_close = ttk.Button(master=frm_buttons,
                                text="Close",
                                width=5,
                                command=self._callback_close,
-                               bootstyle="secondary")
+                               bootstyle="primary")
         btn_save.pack(side="left", padx=5, pady=5, anchor="w")
         btn_clear.pack(side="left", padx=5, pady=5, anchor="w")
         btn_close.pack(side="left", padx=5, pady=5, anchor="w")
@@ -302,17 +302,17 @@ class WindowAddInterface(ttk.Toplevel):
         btn_save = ttk.Button(master=frm_buttons,
                               text="Save",
                               command=self._callback_save,
-                              bootstyle="secondary")
+                              bootstyle="primary")
         btn_clear = ttk.Button(master=frm_buttons,
                                text="Clear",
                                width=5,
                                command=self._callback_clear,
-                               bootstyle="secondary")
+                               bootstyle="primary")
         btn_close = ttk.Button(master=frm_buttons,
                                text="Close",
                                width=5,
                                command=self._callback_close,
-                               bootstyle="secondary")
+                               bootstyle="primary")
         btn_save.pack(side="left", padx=5, pady=5, anchor="w")
         btn_clear.pack(side="left", padx=5, pady=5, anchor="w")
         btn_close.pack(side="left", padx=5, pady=5, anchor="w")

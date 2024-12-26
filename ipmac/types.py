@@ -14,7 +14,7 @@ COLDATA = [
     {"text": "IF type", "stretch": True},
 ]
 
-GUI_STYLE_NAME = "yeti"
+GUI_STYLE_NAME = "sandstone"
 
 
 @dataclass
