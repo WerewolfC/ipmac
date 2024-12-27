@@ -1,6 +1,6 @@
 """Types module containing data classes and constants"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 
 IF_TYPE = {
     0: "Wired",
@@ -19,25 +19,26 @@ GUI_STYLE_NAME = "sandstone"
 
 @dataclass
 class DeviceData:
+    device_id: int = 0
     device_name: str = ""
     device_desc: str = ""
+
+    def __iter__(self):
+        yield from astuple(self)
 
 
 @dataclass
 class InterfaceData:
+    if_id: int = 0
     device_name: str = ""
     ip: str = ""
     mac: str = ""
     if_type: int = 0
 
+    def __iter__(self):
+        yield from astuple(self)
+
 
 default_device_data = DeviceData()
 default_if_data = InterfaceData()
-
-stub_device_data = DeviceData("Wolverine", "Some really long description")
-stub_if_data = InterfaceData(
-    "Wolverine",
-    "192.168.0.1",
-    "aa:bb:cc:dd:ee:ff",
-    0
-)
+all_device_list = DeviceData(0, "All", "All available devices")
