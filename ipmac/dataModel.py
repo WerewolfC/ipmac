@@ -1,6 +1,7 @@
 """Data model to process SQLite data"""
 import ipmac.sqlOperations as db
-from ipmac.types import all_device_list, DeviceData, InterfaceData
+from ipmac.types import all_device_list, DeviceData, InterfaceData, IF_TYPE
+from pprint import pprint
 
 
 def return_name(e):
@@ -15,17 +16,36 @@ class SqlData:
         # self.create_device_struct()
         self.active_device = None
 
-    def create_device_struct(self):
-        """Get all elements from device table """
+    def update_data(self):
+        """Get all elements from device and if tables """
         self.device_list = [all_device_list]  # list of DeviceData obj
-        table_rows = db.get_all_devices()
-        print(f'received from db \n {table_rows}')
+        device_tbl_rows = db.get_all_devices()
+        if_tbl_rows = db.get_all_interfaces()
+
+        pprint(f'received from db ->> {device_tbl_rows} -->>{if_tbl_rows}')
         device_data_list = []
-        for row in table_rows:
-            new_device = DeviceData(row[0], row[1], row[2])
+        for row in device_tbl_rows:
+            if_list = [InterfaceData(ifx[0], ifx[1], ifx[2], ifx[3], ifx[4])
+                        for ifx in if_tbl_rows if ifx[1] == row[0]]
+            print(f"if_list {if_list}")
+            new_device = DeviceData(row[0], row[1], row[2], if_list)
             device_data_list.append((new_device))
-        print(f'ordered structure{device_data_list}')
         self.device_list.extend(device_data_list)
+        pprint(f"full data \n {self.device_list}")
+
+    def get_active_if_data(self):
+        """Returns if data formated to be displayed, from active device"""
+        # create a list of (dev_name, ip, mac, type) extracted from InterfaceData obj list
+        formated_if_list = []
+        for ifx in self.active_device.if_list:
+            pprint(f"ifx {ifx}")
+            formated_if_list.append((self.active_device.device_name,
+                                     ifx.ip,
+                                     ifx.mac,
+                                     IF_TYPE[ifx.if_type]))
+
+        pprint(f"formated if list {formated_if_list}")
+        return formated_if_list
 
     def get_devices(self):
         """Returns a list of (dev_id, device_name)"""
@@ -53,16 +73,16 @@ class SqlData:
 
     def update_device_data(self, *args):
         """Update device data to device table"""
-        print(f"update formated data {args}")
+        pprint(f"update formated data {args}")
         id, name, desc = args[0]
         formated_data = (name, desc, id)
-        print(f"update formated data {id} {name} {desc}")
+        pprint(f"update formated data {id} {name} {desc}")
         db.update_device_table(formated_data)
 
     def is_device_present(self, device_name):
         """Search for specified device name in a list of Device obj"""
         device_name_list = [return_name(dev_obj) for dev_obj in self.device_list]
-        print(f"searched dev name list {device_name_list}")
+        pprint(f"searched dev name list {device_name_list}")
         return device_name in device_name_list
 
 

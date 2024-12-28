@@ -9,9 +9,13 @@ class Presenter:
         self.view = Gui()
         self.data = SqlData()
 
+    def handle_update_all_data(self):
+        """Returns all data from model"""
+        self.data.update_data()
+
     def handle_get_list_data(self):
         """Returns list data from model"""
-        self.data.create_device_struct()
+        # self.data.create_device_struct()
         return self.data.get_devices()
 
     def handle_update_active_device(self, idx):
@@ -41,6 +45,10 @@ class Presenter:
     def handle_check_device(self, dev_name):
         """Calls model to verify if device_name already exists"""
         return self.data.is_device_present(dev_name)
+
+    def handle_get_if_for_active_device(self):
+        """Returns formated interface list of active device"""
+        return self.data.get_active_if_data()
 
     def run(self):
         """Run method of Presenter"""

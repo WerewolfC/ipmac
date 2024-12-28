@@ -1,6 +1,6 @@
 """Types module containing data classes and constants"""
 
-from dataclasses import dataclass, astuple
+from dataclasses import dataclass, astuple, field
 
 IF_TYPE = {
     0: "Wired",
@@ -18,22 +18,23 @@ GUI_STYLE_NAME = "sandstone"
 
 
 @dataclass
-class DeviceData:
+class InterfaceData:
+    if_id: int = 0
     device_id: int = 0
-    device_name: str = ""
-    device_desc: str = ""
+    ip: str = ""
+    mac: str = ""
+    if_type: int = 0
 
     def __iter__(self):
         yield from astuple(self)
 
 
 @dataclass
-class InterfaceData:
-    if_id: int = 0
+class DeviceData:
+    device_id: int = 0
     device_name: str = ""
-    ip: str = ""
-    mac: str = ""
-    if_type: int = 0
+    device_desc: str = ""
+    if_list: list[InterfaceData] = field(default_factory=list)
 
     def __iter__(self):
         yield from astuple(self)

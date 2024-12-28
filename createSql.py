@@ -16,12 +16,13 @@ STUB_DEVICE_DATA = [
 ]
 
 STUB_IF_DATA = [
-    ("192.168.0.11", "00:11:22:33:44:55:16", 0),
-    ("192.168.0.21", "00:11:22:33:44:55:26", 0),
-    ("192.168.0.31", "00:11:22:33:44:55:36", 0),
-    ("192.168.0.41", "00:11:22:33:44:55:46", 0),
-    ("192.168.0.41", "00:11:22:33:44:55:56", 0),
-    ("192.168.0.51", "00:11:22:33:44:55:66", 0),
+    (1, "192.168.0.11", "00:11:22:33:44:55:16", 0),  # Storm
+    (1, "192.168.0.111", "aa:11:22:33:44:55:16", 0),  # Storm
+    (2, "192.168.0.21", "00:11:22:33:44:55:26", 0),  # Cyclops
+    (3, "192.168.0.31", "00:11:22:33:44:55:36", 0),  # Wolverine
+    (4, "192.168.0.41", "00:11:22:33:44:55:46", 0),  # Jean
+    (5, "192.168.0.41", "00:11:22:33:44:55:56", 0),  # Banshee
+    (6, "192.168.0.51", "00:11:22:33:44:55:66", 0),  # Xavier
 ]
 
 
@@ -87,10 +88,11 @@ if __name__ == "__main__":
         add_to_device_table(device_data)
         device_list.append(device_data[0])
 
-    zipped_data = zip(device_list, STUB_IF_DATA)
-    for item in zipped_data:
-        add_to_if_table((item[0], *item[1]))
-        add_to_if_table((item[0], *item[1]))
-
+    # zipped_data = zip(device_list, STUB_IF_DATA)
+    # for item in zipped_data:
+    #     add_to_if_table((item[0], *item[1]))
+    for item in STUB_IF_DATA:
+        print(item)
+        add_to_if_table(item)
     pprint.pprint(read_all_devices())
     pprint.pprint(read_all_interfaces())

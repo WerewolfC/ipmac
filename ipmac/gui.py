@@ -2,8 +2,10 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
+from ttkbootstrap.scrolled import ScrolledText
 import re
 from typing import Protocol
+from pprint import pprint
 
 import ipmac.types as data_types
 
@@ -23,6 +25,9 @@ def disable_event():
 
 class Presenter(Protocol):
     """Protocol implementation for Presenter class"""
+
+    def handle_update_all_data(self):
+        ...
 
     def handle_get_list_data(self):
         ...
@@ -66,6 +71,7 @@ class Gui(ttk.Window):
         """Create main window"""
 
         self.presenter = presenter
+        self.presenter.handle_update_all_data()
         self.add_top_frame()
         self.add_left_frame()
         self.add_rigth_frame()
@@ -120,12 +126,13 @@ class Gui(ttk.Window):
     def add_rigth_frame(self):
         """Create details frame"""
         info_frame = ttk.Frame(self)
-        tbl_list_if = Tableview(
+        self.tbl_list_if = Tableview(
             master=info_frame,
             coldata=data_types.COLDATA,
-            stripecolor=(self.style.colors.light, None),
+            searchable=False,
+            autofit=True,
         )
-        tbl_list_if.pack(side="bottom", expand=True, fill="both")
+        self.tbl_list_if.pack(side="bottom", expand=True, fill="both")
 
         btn_add_if = ttk.Button(master=info_frame,
                                 text="+",
@@ -157,8 +164,8 @@ class Gui(ttk.Window):
         info_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5)
 
         desc_frame = ttk.Frame(self)
-        txt_device_desc = ttk.Text(desc_frame, height=3, width=60)
-        txt_device_desc.pack(side="left", expand=True, padx=5, pady=5)
+        self.txt_device_desc = ScrolledText(desc_frame, autohide=True, height=3, width=60)
+        self.txt_device_desc.pack(side="left", expand=True, padx=5, pady=5)
         btn_exit_app = ttk.Button(master=desc_frame,
                                   text="Exit",
                                   command=self._cb_exit,
@@ -213,13 +220,13 @@ class Gui(ttk.Window):
         """Callback the presenter handle and update the list widget"""
         device_data = self.presenter.handle_get_list_data()
         self.lst_device.delete(0, tk.END)
-        print(f'received data for update \n {device_data}')
-        print(f'actual content before \n {self.lst_device.get(0, tk.END)}')
+        pprint(f'received data for update \n {device_data}')
+        pprint(f'actual content before \n {self.lst_device.get(0, tk.END)}')
         for data in device_data:
-            print(f'\tinserted data {data}\n')
+            pprint(f'\tinserted data {data}\n')
             self.lst_device.insert(*data)
-        print(f'actual content after \n {self.lst_device.get(0, tk.END)}')
-        # self.lst_device.selection_set(0)
+        pprint(f'actual content after \n {self.lst_device.get(0, tk.END)}')
+        self.lst_device.selection_set(0)
 
     def cb_lst_select(self, event):
         """"Callback method for element selection in list
@@ -233,8 +240,16 @@ class Gui(ttk.Window):
             # TODO - implement presenter handler
             # callback presenter to update active device in model
             self.presenter.handle_update_active_device(selection[0])
-            print(self.presenter.handle_get_active_device())
-            # callback presenter to get if list
+            pprint(self.presenter.handle_get_active_device())
+            # write description to the right frame
+            self.txt_device_desc.delete(1.0, tk.END)
+            self.txt_device_desc.insert(tk.END, self.presenter.handle_get_active_device().device_desc)
+            # callback presenter to get if list for curently selected device
+            if_list = self.presenter.handle_get_if_for_active_device()
+            # for if_element in if_list:
+            #     self.tbl_list_if.insert_row(tk.END, if_element)
+            self.tbl_list_if.build_table_data(coldata=data_types.COLDATA,
+                                              rowdata=if_list)
             # callback gui to update if list
 
 
@@ -280,7 +295,7 @@ class WindowAddDevice(ttk.Toplevel):
         frm_device_desc = ttk.Frame(self)
         lbl_device_desc = ttk.Label(frm_device_desc, text="Description:", width=20)
         lbl_device_desc.pack(side="top", expand=True, fill="x")
-        self._txt_device_desc = ttk.Text(frm_device_desc, height=5)
+        self._txt_device_desc = ScrolledText(frm_device_desc, autohide=True, height=5)
         self._txt_device_desc.insert("1.0", self._device_data.device_desc)
         self._txt_device_desc.pack()
 
