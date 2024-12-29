@@ -33,19 +33,28 @@ class SqlData:
         self.device_list.extend(device_data_list)
         pprint(f"full data \n {self.device_list}")
 
-    def get_active_if_data(self):
-        """Returns if data formated to be displayed, from active device"""
+    def get_if_data(self, device_obj):
+        """Returns if data formated to be displayed, based on suplied device"""
         # create a list of (dev_name, ip, mac, type) extracted from InterfaceData obj list
         formated_if_list = []
-        for ifx in self.active_device.if_list:
+        for ifx in device_obj.if_list:
             pprint(f"ifx {ifx}")
-            formated_if_list.append((self.active_device.device_name,
+            formated_if_list.append((device_obj.device_name,
                                      ifx.ip,
                                      ifx.mac,
                                      IF_TYPE[ifx.if_type]))
 
         pprint(f"formated if list {formated_if_list}")
         return formated_if_list
+
+    def get_all_if_data(self):
+        """Returns all IF data formated"""
+        # for all devices group interfaces in a list
+        if_list = []
+        for device in self.device_list[1::]:
+            if_list.extend(self.get_if_data(device))
+        # return [self.get_if_data(device) for device in self.device_list[1::]]
+        return if_list
 
     def get_devices(self):
         """Returns a list of (dev_id, device_name)"""

@@ -46,9 +46,13 @@ class Presenter:
         """Calls model to verify if device_name already exists"""
         return self.data.is_device_present(dev_name)
 
-    def handle_get_if_for_active_device(self):
+    def handle_get_if_for_device(self, device_obj):
         """Returns formated interface list of active device"""
-        return self.data.get_active_if_data()
+        return self.data.get_if_data(device_obj)
+
+    def handle_get_all_if(self):
+        """Returns formated interface list for all devices"""
+        return self.data.get_all_if_data()
 
     def run(self):
         """Run method of Presenter"""

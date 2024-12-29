@@ -53,6 +53,12 @@ class Presenter(Protocol):
     def handle_check_device(self, device_name):
         ...
 
+    def handle_if_for_device(self, device_obj):
+        ...
+
+    def handle_get_all_if(sel):
+        ...
+
 
 class Gui(ttk.Window):
     """Class implements main window"""
@@ -126,9 +132,12 @@ class Gui(ttk.Window):
     def add_rigth_frame(self):
         """Create details frame"""
         info_frame = ttk.Frame(self)
+
+        if_list = self.presenter.handle_get_all_if()
         self.tbl_list_if = Tableview(
             master=info_frame,
             coldata=data_types.COLDATA,
+            rowdata=if_list,
             searchable=False,
             autofit=True,
         )
@@ -237,20 +246,23 @@ class Gui(ttk.Window):
 
         selection = event.widget.curselection()
         if selection:
-            # TODO - implement presenter handler
             # callback presenter to update active device in model
             self.presenter.handle_update_active_device(selection[0])
-            pprint(self.presenter.handle_get_active_device())
+            if self.presenter.handle_get_active_device().device_id == 0:
+                # All devices option selected in gui
+                if_list = self.presenter.handle_get_all_if()
+            else:
+                # callback presenter to get if list for curently selected device
+                if_list = self.presenter.handle_get_if_for_device(self.presenter.handle_get_active_device())
+            pprint(f"computed if_list {if_list}")
             # write description to the right frame
+            # self.txt_device_desc.config(state=tk.NORMAL)
             self.txt_device_desc.delete(1.0, tk.END)
             self.txt_device_desc.insert(tk.END, self.presenter.handle_get_active_device().device_desc)
-            # callback presenter to get if list for curently selected device
-            if_list = self.presenter.handle_get_if_for_active_device()
-            # for if_element in if_list:
-            #     self.tbl_list_if.insert_row(tk.END, if_element)
+            # self.txt_device_desc.config(state=tk.DISABLED)
+            # update interface list
             self.tbl_list_if.build_table_data(coldata=data_types.COLDATA,
                                               rowdata=if_list)
-            # callback gui to update if list
 
 
 class WindowAddDevice(ttk.Toplevel):
