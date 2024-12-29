@@ -142,6 +142,8 @@ class Gui(ttk.Window):
             autofit=True,
         )
         self.tbl_list_if.pack(side="bottom", expand=True, fill="both")
+        # self.tbl_list_if.bind("<<ButtonRelease-1>>", self.cb_tableview_select)
+        self.tbl_list_if.view.bind('<<TreeviewSelect>>', self.cb_tableview_select)
 
         btn_add_if = ttk.Button(master=info_frame,
                                 text="+",
@@ -263,6 +265,17 @@ class Gui(ttk.Window):
             # update interface list
             self.tbl_list_if.build_table_data(coldata=data_types.COLDATA,
                                               rowdata=if_list)
+    
+    def cb_tableview_select(self, event):
+        """Callback method when element is selected in tableview"""
+        pprint(event)
+        selection = event.widget.selection()
+        pprint(selection)
+        # current_selection = self.tbl_list_if.selection_get()
+        current_selection = self.tbl_list_if.get_rows(selected=True)
+        print(type(current_selection))
+        print(current_selection[0].values)
+        # pprint(self.tbl_list_if.item(current_selection))
 
 
 class WindowAddDevice(ttk.Toplevel):
