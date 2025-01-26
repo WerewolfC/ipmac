@@ -23,7 +23,7 @@ class Presenter:
         self.data.update_active_device(idx)
 
     def handle_get_active_device(self):
-        """Returns active device obj from model"""
+        """Returns active DeviceData obj from model"""
         return self.data.get_active_device()
 
     def handle_save_device_data(self, data):

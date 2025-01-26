@@ -42,4 +42,4 @@ class DeviceData:
 
 default_device_data = DeviceData()
 default_if_data = InterfaceData()
-all_device_list = DeviceData(0, "All", "All available devices")
+all_device_list = DeviceData(0, "All", "All available devices", ["*"])

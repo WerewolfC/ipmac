@@ -17,6 +17,14 @@ WINDOW_ADD_DEVICE_TITLE = "Add new device"
 WINDOW_ADD_INTERFACE_SIZE = "350x220"
 WINDOW_ADD_INTERFACE_TITLE = "Add new device"
 
+# message dialogs
+
+REMOVE_DEVICE_TITLE = "Are you sure you want to remove device {0}?"
+REMOVE_DEVICE_TEXT = "Remove {0}"
+DEVICE_EXISTS_TITLE = """Cannot delete Device {0}.There are interfaces defined for this device.\n
+                        Delete existing interfaces first"""
+DEVICE_EXISTS_TEXT = "Cannot remove {0}"
+
 
 def disable_event():
     """Empty function used to disable windows close x button"""
@@ -75,7 +83,6 @@ class Gui(ttk.Window):
 
     def create_main_gui(self, presenter):
         """Create main window"""
-
         self.presenter = presenter
         self.presenter.handle_update_all_data()
         self.add_top_frame()
@@ -203,20 +210,32 @@ class Gui(ttk.Window):
 
     def _cb_rem_device(self):
         """Remove device callback method"""
+        selected_device = self.presenter.handle_get_active_device()
 
-        choice = ttk.dialogs.dialogs.Messagebox.yesno(
-            message="Are you sure you want to remove it ?",
-            title="Remove device",
-            parent=self,
-            alert=True
-        )
-        if choice == "Yes":
-            self.presenter.handle_delete_device(self.presenter.handle_get_active_device())
-            self.presenter.handle_trigger_update_dev_list()
+        if not selected_device.if_list:
+            # device has no if assigned
+            remove = ttk.dialogs.dialogs.Messagebox.yesno(
+                message=REMOVE_DEVICE_TITLE.format(selected_device.device_name),
+                title=REMOVE_DEVICE_TEXT.format(selected_device.device_name),
+                parent=self,
+                alert=True
+            )
+            if remove == "Yes":
+                self.presenter.handle_delete_device(selected_device)
+                self.presenter.handle_trigger_update_dev_list()
+        else:
+            # there are no if for device
+            can_not_remove_dialog = ttk.dialogs.dialogs.Messagebox.show_warning(
+                message=DEVICE_EXISTS_TEXT.format(selected_device.device_name),
+                title=DEVICE_EXISTS_TITLE.format(selected_device.device_name),
+                parent=self,
+                alert=True
+            )
 
     def _cb_edit_device(self):
         """Edit device callback method"""
-        self.device_win = DeviceWinManager.get_device_window(self.presenter, self.presenter.handle_get_active_device())
+        self.device_win = DeviceWinManager.get_device_window(self.presenter,
+                                                             self.presenter.handle_get_active_device())
         self.device_win.focus()
 
     def _cb_edit_if(self):
@@ -242,12 +261,8 @@ class Gui(ttk.Window):
         """Callback the presenter handle and update the list widget"""
         device_data = self.presenter.handle_get_list_data()
         self.lst_device.delete(0, tk.END)
-        pprint(f'received data for update \n {device_data}')
-        pprint(f'actual content before \n {self.lst_device.get(0, tk.END)}')
         for data in device_data:
-            pprint(f'\tinserted data {data}\n')
             self.lst_device.insert(*data)
-        pprint(f'actual content after \n {self.lst_device.get(0, tk.END)}')
         self.lst_device.selection_set(0)
 
     def cb_lst_select(self, event):
@@ -267,7 +282,6 @@ class Gui(ttk.Window):
             else:
                 # callback presenter to get if list for curently selected device
                 if_list = self.presenter.handle_get_if_for_device(self.presenter.handle_get_active_device())
-            pprint(f"computed if_list {if_list}")
             # write description to the right frame
             # self.txt_device_desc.config(state=tk.NORMAL)
             self.txt_device_desc.delete(1.0, tk.END)
@@ -279,13 +293,9 @@ class Gui(ttk.Window):
 
     def cb_tableview_select(self, event):
         """Callback method when element is selected in tableview"""
-        pprint(event)
         selection = event.widget.selection()
-        pprint(selection)
         # current_selection = self.tbl_list_if.selection_get()
         current_selection = self.tbl_list_if.get_rows(selected=True)
-        print(type(current_selection))
-        print(current_selection[0].values)
         # pprint(self.tbl_list_if.item(current_selection))
 
 
@@ -338,17 +348,17 @@ class WindowAddDevice(ttk.Toplevel):
         frm_buttons = ttk.Frame(self)
         btn_save_dev = ttk.Button(master=frm_buttons,
                                   text="Save",
-                                  command=self._callback_save,
+                                  command=self._cb_device_save,
                                   bootstyle="primary")
         btn_clear_dev = ttk.Button(master=frm_buttons,
                                    text="Clear",
                                    width=5,
-                                   command=self._callback_clear,
+                                   command=self._cb_device_clear,
                                    bootstyle="primary")
         btn_close_dev = ttk.Button(master=frm_buttons,
                                    text="Close",
                                    width=5,
-                                   command=self._callback_close,
+                                   command=self._cb_device_close,
                                    bootstyle="primary")
         btn_save_dev.pack(side="left", padx=5, pady=5, anchor="w")
         btn_clear_dev.pack(side="left", padx=5, pady=5, anchor="w")
@@ -358,7 +368,7 @@ class WindowAddDevice(ttk.Toplevel):
         frm_device_desc.pack(padx=5, pady=5)
         frm_buttons.pack(padx=5, pady=5)
 
-    def _callback_save(self):
+    def _cb_device_save(self):
         """Callback method to save device data
 
         Check if device_name already exist, if not add new device...
@@ -375,14 +385,14 @@ class WindowAddDevice(ttk.Toplevel):
         else:
             # add new device
             self.presenter.handle_save_device_data(dev_data)
-            self._callback_clear()
+            self._cb_device_close()
 
-    def _callback_close(self):
+    def _cb_device_close(self):
         """Callback method to close window"""
         DeviceWinManager.destroy_device_edit_window()
         self.presenter.handle_trigger_update_dev_list()
 
-    def _callback_clear(self):
+    def _cb_device_clear(self):
         """Callback method to clear IO fields"""
 
         self._device_name.set("")
@@ -460,17 +470,17 @@ class WindowAddInterface(ttk.Toplevel):
         frm_buttons = ttk.Frame(self)
         btn_save_if = ttk.Button(master=frm_buttons,
                                  text="Save",
-                                 command=self._callback_save,
+                                 command=self._cb_if_save,
                                  bootstyle="primary")
         btn_clear_if = ttk.Button(master=frm_buttons,
                                   text="Clear",
                                   width=5,
-                                  command=self._callback_clear,
+                                  command=self._cb_if_clear,
                                   bootstyle="primary")
         btn_close_if = ttk.Button(master=frm_buttons,
                                   text="Close",
                                   width=5,
-                                  command=self._callback_close,
+                                  command=self._cb_if_close,
                                   bootstyle="primary")
         btn_save_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_clear_if.pack(side="left", padx=5, pady=5, anchor="w")
@@ -481,16 +491,16 @@ class WindowAddInterface(ttk.Toplevel):
         frm_type.pack(padx=5, pady=5)
         frm_buttons.pack(padx=5, pady=5)
 
-    def _callback_save(self):
+    def _cb_if_save(self):
         """Callback method to save"""
         # TODO
         pass
 
-    def _callback_close(self):
+    def _cb_if_close(self):
         """Callback method to close window"""
         IfWinManager.destroy_if_edit_window()
 
-    def _callback_clear(self):
+    def _cb_if_clear(self):
         """Callback method to clear IO fields"""
 
         self._ip_name.set("")
@@ -529,7 +539,8 @@ class DeviceWinManager:
     def get_device_window(presenter, dev_data):
         """Returns a device edit window """
         if not DeviceWinManager._device_edit_window:
-            DeviceWinManager._device_edit_window = WindowAddDevice(presenter=presenter, device_data=dev_data)
+            DeviceWinManager._device_edit_window = WindowAddDevice(presenter=presenter,
+                                                                   device_data=dev_data)
         return DeviceWinManager._device_edit_window
 
     @staticmethod

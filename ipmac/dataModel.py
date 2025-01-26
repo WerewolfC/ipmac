@@ -13,7 +13,6 @@ class SqlData:
 
     def __init__(self):
         self.device_list = None  # list of DeviceData obj
-        # self.create_device_struct()
         self.active_device = None
 
     def update_data(self):
@@ -22,29 +21,24 @@ class SqlData:
         device_tbl_rows = db.get_all_devices()
         if_tbl_rows = db.get_all_interfaces()
 
-        pprint(f'received from db ->> {device_tbl_rows} -->>{if_tbl_rows}')
         device_data_list = []
         for row in device_tbl_rows:
             if_list = [InterfaceData(ifx[0], ifx[1], ifx[2], ifx[3], ifx[4])
                         for ifx in if_tbl_rows if ifx[1] == row[0]]
-            print(f"if_list {if_list}")
             new_device = DeviceData(row[0], row[1], row[2], if_list)
             device_data_list.append((new_device))
         self.device_list.extend(device_data_list)
-        pprint(f"full data \n {self.device_list}")
 
     def get_if_data(self, device_obj):
         """Returns if data formated to be displayed, based on suplied device"""
         # create a list of (dev_name, ip, mac, type) extracted from InterfaceData obj list
         formated_if_list = []
         for ifx in device_obj.if_list:
-            pprint(f"ifx {ifx}")
             formated_if_list.append((device_obj.device_name,
                                      ifx.ip,
                                      ifx.mac,
                                      IF_TYPE[ifx.if_type]))
 
-        pprint(f"formated if list {formated_if_list}")
         return formated_if_list
 
     def get_all_if_data(self):
@@ -66,6 +60,7 @@ class SqlData:
     def update_active_device(self, active_id):
         """Update active device based on info from presenter"""
         self.active_device = [dev for dev in self.device_list if dev.device_id == active_id][0]
+        print(f"selected device {self.active_device}")
 
     def get_active_device(self):
         """Get active device object"""
@@ -82,16 +77,13 @@ class SqlData:
 
     def update_device_data(self, *args):
         """Update device data to device table"""
-        pprint(f"update formated data {args}")
         id, name, desc = args[0]
         formated_data = (name, desc, id)
-        pprint(f"update formated data {id} {name} {desc}")
         db.update_device_table(formated_data)
 
     def is_device_present(self, device_name):
         """Search for specified device name in a list of Device obj"""
         device_name_list = [return_name(dev_obj) for dev_obj in self.device_list]
-        pprint(f"searched dev name list {device_name_list}")
         return device_name in device_name_list
 
 
