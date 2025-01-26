@@ -101,22 +101,22 @@ class SqlData:
         table_rows = cursor.execute(queries.QUERY_SELECT_ALL_IF).fetchall()
         return table_rows
 
-    
+
     def add_if_data(self, cursor, *args):
         """Writes if data to interface table"""
         cursor.execute(queries.QUERY_ADD_IF, *args)
 
-    
+
     def remove_if_data(self, if_id):
         """Writes if data to if table"""
         pass
 
-    
+
     def update_if_data(self, new_if_data):
         """Update if data to interface table"""
         pass
 
-    
+
     def search_in_db(self):
         """Search in SQLite db"""
         pass

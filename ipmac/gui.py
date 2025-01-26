@@ -12,7 +12,7 @@ import ipmac.types as data_types
 # window params
 WINDOW_MAIN_SIZE = "800x450"
 WINDOW_MAIN_TITLE = "IPMac utility"
-WINDOW_ADD_DEVICE_SIZE = "350x240"
+WINDOW_ADD_DEVICE_SIZE = "350x210"
 WINDOW_ADD_DEVICE_TITLE = "Add new device"
 WINDOW_ADD_INTERFACE_SIZE = "350x220"
 WINDOW_ADD_INTERFACE_TITLE = "Add new device"
@@ -127,7 +127,7 @@ class Gui(ttk.Window):
         btn_add_device.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_device.pack(side="left", padx=5, pady=5, anchor="w")
         btn_edit_device.pack(side="left", padx=5, pady=5, anchor="w")
-        device_frame.pack(side="left", expand=True, fill="both", padx=5, pady=5)
+        device_frame.pack(side="left", expand=False, fill="both", padx=5, pady=5)
 
     def add_rigth_frame(self):
         """Create details frame"""
@@ -135,6 +135,7 @@ class Gui(ttk.Window):
 
         if_list = self.presenter.handle_get_all_if()
         self.tbl_list_if = Tableview(
+            height=15,
             master=info_frame,
             coldata=data_types.COLDATA,
             rowdata=if_list,
@@ -172,11 +173,11 @@ class Gui(ttk.Window):
         btn_edit_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_copy_mac.pack(side="right", padx=5, pady=5, anchor="w")
         btn_copy_ip.pack(side="right", padx=5, pady=5, anchor="w")
-        info_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5)
+        info_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5) #  info data frame
 
-        desc_frame = ttk.Frame(self)
-        self.txt_device_desc = ScrolledText(desc_frame, autohide=True, height=3, width=60)
-        self.txt_device_desc.pack(side="left", expand=True, padx=5, pady=5)
+        desc_frame = ttk.Frame(self) #  description frame
+        self.txt_device_desc = ScrolledText(desc_frame, autohide=True, height=3, width=80)
+        self.txt_device_desc.pack(side="left", expand=False, padx=5, pady=5)
         btn_exit_app = ttk.Button(master=desc_frame,
                                   text="Exit",
                                   command=self._cb_exit,
@@ -265,7 +266,7 @@ class Gui(ttk.Window):
             # update interface list
             self.tbl_list_if.build_table_data(coldata=data_types.COLDATA,
                                               rowdata=if_list)
-    
+
     def cb_tableview_select(self, event):
         """Callback method when element is selected in tableview"""
         pprint(event)
@@ -287,7 +288,7 @@ class WindowAddDevice(ttk.Toplevel):
                  device_data=data_types.default_device_data):
         """Create add device GUI frame
 
-        win_tytle   = window title
+        win_title   = window title
         device_data = optional object containing Device name + device description
                       is used only for editing existing device
 
@@ -358,6 +359,7 @@ class WindowAddDevice(ttk.Toplevel):
         dev_data = data_types.DeviceData(self._device_data.device_id,
                                          target_name,
                                          self._txt_device_desc.get("1.0", tk.END))
+        print(dev_data)
         if dev_present:
             # dev is present, proceed with update data
             self.presenter.handle_update_device(dev_data)
