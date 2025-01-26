@@ -73,7 +73,7 @@ class SqlData:
 
     def add_device_data(self, *args):
         """Writes device data to device table"""
-        formated_data = tuple(args[0])[1::]
+        formated_data = tuple(args[0])[1:-1]
         db.add_to_device_table(formated_data)
 
     def delete_device_data(self, device_obj):

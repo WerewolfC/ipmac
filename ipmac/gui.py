@@ -105,21 +105,29 @@ class Gui(ttk.Window):
         """Create listbox frame"""
         device_frame = ttk.Frame(self)
 
-        self.lst_device = tk.Listbox(device_frame)
+        dev_list_frame = ttk.Frame(device_frame)
+        lst_device_scroll = tk.Scrollbar(dev_list_frame, orient="vertical")
+        self.lst_device = tk.Listbox(dev_list_frame,
+                                     yscrollcommand=lst_device_scroll.set)
         self.lst_device.bind("<<ListboxSelect>>", self.cb_lst_select)
-        self.lst_device.pack(side="top", expand=True, fill="both", padx=5, pady=5)
+        self.lst_device.pack(side="left", expand=True, fill="both", pady=5)
 
-        btn_add_device = ttk.Button(master=device_frame,
+        lst_device_scroll.config(command=self.lst_device.yview)
+        lst_device_scroll.pack(side="left", fill="y")
+        dev_list_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5)
+
+        device_actions_frame = ttk.Frame(device_frame)
+        btn_add_device = ttk.Button(master=device_actions_frame,
                                     text="+",
                                     width=3,
                                     command=self._cb_add_device,
                                     bootstyle="primary")
-        btn_rem_device = ttk.Button(master=device_frame,
+        btn_rem_device = ttk.Button(master=device_actions_frame,
                                     text="-",
                                     width=3,
                                     command=self._cb_rem_device,
                                     bootstyle="primary")
-        btn_edit_device = ttk.Button(master=device_frame,
+        btn_edit_device = ttk.Button(master=device_actions_frame,
                                      text="...",
                                      width=3,
                                      command=self._cb_edit_device,
@@ -127,6 +135,8 @@ class Gui(ttk.Window):
         btn_add_device.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_device.pack(side="left", padx=5, pady=5, anchor="w")
         btn_edit_device.pack(side="left", padx=5, pady=5, anchor="w")
+        device_actions_frame.pack(side="bottom", expand=False, fill="both", padx=5, pady=5)
+
         device_frame.pack(side="left", expand=False, fill="both", padx=5, pady=5)
 
     def add_rigth_frame(self):
@@ -359,20 +369,18 @@ class WindowAddDevice(ttk.Toplevel):
         dev_data = data_types.DeviceData(self._device_data.device_id,
                                          target_name,
                                          self._txt_device_desc.get("1.0", tk.END))
-        print(dev_data)
         if dev_present:
             # dev is present, proceed with update data
             self.presenter.handle_update_device(dev_data)
         else:
             # add new device
             self.presenter.handle_save_device_data(dev_data)
-            # self.presenter.handle_trigger_update_dev_list()
             self._callback_clear()
-        self.presenter.handle_trigger_update_dev_list()
 
     def _callback_close(self):
         """Callback method to close window"""
         DeviceWinManager.destroy_device_edit_window()
+        self.presenter.handle_trigger_update_dev_list()
 
     def _callback_clear(self):
         """Callback method to clear IO fields"""

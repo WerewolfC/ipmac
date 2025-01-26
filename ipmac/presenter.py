@@ -40,6 +40,7 @@ class Presenter:
 
     def handle_trigger_update_dev_list(self):
         """Triger update device device list in gui """
+        self.handle_update_all_data()
         self.view.update_device_list()
 
     def handle_check_device(self, dev_name):
