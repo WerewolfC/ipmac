@@ -14,16 +14,16 @@ WINDOW_MAIN_SIZE = "800x450"
 WINDOW_MAIN_TITLE = "IPMac utility"
 WINDOW_ADD_DEVICE_SIZE = "350x210"
 WINDOW_ADD_DEVICE_TITLE = "Add new device"
-WINDOW_ADD_INTERFACE_SIZE = "350x220"
-WINDOW_ADD_INTERFACE_TITLE = "Add new device"
+WINDOW_ADD_INTERFACE_SIZE = "350x180"
+WINDOW_ADD_INTERFACE_TITLE = "Add new interface"
 
 # message dialogs
 
 REMOVE_DEVICE_TITLE = "Are you sure you want to remove device {0}?"
 REMOVE_DEVICE_TEXT = "Remove {0}"
-DEVICE_EXISTS_TITLE = """Cannot delete Device {0}.There are interfaces defined for this device.\n
-                        Delete existing interfaces first"""
-DEVICE_EXISTS_TEXT = "Cannot remove {0}"
+DEVICE_EXISTS_TITLE = "Cannot remove {0}"
+DEVICE_EXISTS_TEXT = """There are interfaces defined for this device.\nDelete existing interfaces first"""
+
 
 
 def disable_event():
@@ -332,8 +332,9 @@ class WindowAddDevice(ttk.Toplevel):
         validate_device_name = self.register(self.check_device_name)
         self._device_name = tk.StringVar(value=self._device_data.device_name)
         ent_device_name = ttk.Entry(frm_device_name,
-                                    textvariable=self._device_name,
+                                    validate="focus",
                                     validatecommand=(validate_device_name, '%P'),
+                                    textvariable=self._device_name,
                                     width=20)
         ent_device_name.focus()
         ent_device_name.pack(side="top", expand=True, fill="x")
@@ -379,11 +380,16 @@ class WindowAddDevice(ttk.Toplevel):
         dev_data = data_types.DeviceData(self._device_data.device_id,
                                          target_name,
                                          self._txt_device_desc.get("1.0", tk.END))
-        if dev_present:
-            # dev is present, proceed with update data
-            self.presenter.handle_update_device(dev_data)
-        else:
-            # add new device
+        # if dev_present and self.check_device_name:
+        #     # dev is present, proceed with update data
+        #     print(f"device already present {dev_data}")
+        #     self.presenter.handle_update_device(dev_data)
+        # else:
+        #     # add new device
+        #     self.presenter.handle_save_device_data(dev_data)
+        #     self._cb_device_close()
+        if self.check_device_name(self._device_name.get()):
+            #  add new device
             self.presenter.handle_save_device_data(dev_data)
             self._cb_device_close()
 
@@ -401,9 +407,13 @@ class WindowAddDevice(ttk.Toplevel):
 
     @staticmethod
     def check_device_name(dev_name):
-        """Validate device name"""
-        return True
-        # return bool(re.match(valid_pattern, ip_name))
+        """Validate device name
+        Rules:
+            -not empty
+            -alphanumeric [0..9][aA..ZA]
+        """
+        valid_pattern = r"^[a-zA-Z0-9]+$"
+        return bool(re.match(valid_pattern, dev_name))
 
 
 class WindowAddInterface(ttk.Toplevel):
@@ -431,9 +441,6 @@ class WindowAddInterface(ttk.Toplevel):
         # register validation _callback
         validate_ip_address = self.register(self.check_ip_address)
         validate_mac_address = self.register(self.check_mac_address)
-
-        lbl_device_name = ttk.Label(self, text=f"Device name: {self._if_data.device_name}")
-        lbl_device_name.pack()
 
         frm_ip = ttk.Frame(self)
         lbl_ip = ttk.Label(frm_ip, width=15, text="IP address:", anchor="w")
@@ -492,9 +499,8 @@ class WindowAddInterface(ttk.Toplevel):
         frm_buttons.pack(padx=5, pady=5)
 
     def _cb_if_save(self):
-        """Callback method to save"""
-        # TODO
-        pass
+        """Callback method to save interface"""
+        self._cb_if_close
 
     def _cb_if_close(self):
         """Callback method to close window"""

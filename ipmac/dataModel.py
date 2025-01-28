@@ -77,8 +77,9 @@ class SqlData:
 
     def update_device_data(self, *args):
         """Update device data to device table"""
-        id, name, desc = args[0]
-        formated_data = (name, desc, id)
+        formated_data = (args[0].device_name,
+                         args[0].device_desc,
+                         args[0].device_id)
         db.update_device_table(formated_data)
 
     def is_device_present(self, device_name):
