@@ -60,7 +60,6 @@ class SqlData:
     def update_active_device(self, active_id):
         """Update active device based on info from presenter"""
         self.active_device = [dev for dev in self.device_list if dev.device_id == active_id][0]
-        print(f"selected device {self.active_device}")
 
     def get_active_device(self):
         """Get active device object"""
@@ -87,18 +86,15 @@ class SqlData:
         device_name_list = [return_name(dev_obj) for dev_obj in self.device_list]
         return device_name in device_name_list
 
+    def add_if_data(self, *args):
+        """Writes if data to interface table"""
+        db.add_to_if_table(tuple(args[0])[1::])
 
 # from this down to be refactored
     def get_if_struct(self, cursor):
         """Get all elements from interface table """
         table_rows = cursor.execute(queries.QUERY_SELECT_ALL_IF).fetchall()
         return table_rows
-
-
-    def add_if_data(self, cursor, *args):
-        """Writes if data to interface table"""
-        cursor.execute(queries.QUERY_ADD_IF, *args)
-
 
     def remove_if_data(self, if_id):
         """Writes if data to if table"""

@@ -18,12 +18,14 @@ WINDOW_ADD_INTERFACE_SIZE = "350x180"
 WINDOW_ADD_INTERFACE_TITLE = "Add new interface"
 
 # message dialogs
-
 REMOVE_DEVICE_TITLE = "Are you sure you want to remove device {0}?"
 REMOVE_DEVICE_TEXT = "Remove {0}"
 DEVICE_EXISTS_TITLE = "Cannot remove {0}"
 DEVICE_EXISTS_TEXT = """There are interfaces defined for this device.\nDelete existing interfaces first"""
+WRONG_DEVICE_TITLE = "Cannot add interface for {0}"
+WRONG_DEVICE_TEXT = "{0} is not a valid device.\nPlease select a valid device"
 
+BANNED_DEVICE_LIST = [0]
 
 
 def disable_event():
@@ -116,7 +118,7 @@ class Gui(ttk.Window):
         lst_device_scroll = tk.Scrollbar(dev_list_frame, orient="vertical")
         self.lst_device = tk.Listbox(dev_list_frame,
                                      yscrollcommand=lst_device_scroll.set)
-        self.lst_device.bind("<<ListboxSelect>>", self.cb_lst_select)
+        self.lst_device.bind("<<ListboxSelect>>", self._cb_dev_lst_select)
         self.lst_device.pack(side="left", expand=True, fill="both", pady=5)
 
         lst_device_scroll.config(command=self.lst_device.yview)
@@ -246,8 +248,21 @@ class Gui(ttk.Window):
 
     def _cb_add_if(self):
         """Add if callback method"""
-        self.if_win = IfWinManager.get_if_window(data_types.default_if_data)
-        self.if_win.focus()
+        selected_device = self.presenter.handle_get_active_device()
+        if_data = data_types.default_if_data
+        # inherit device_id from the selected device
+        if_data.device_id = selected_device.device_id
+        if selected_device.device_id not in BANNED_DEVICE_LIST:
+            self.if_win = IfWinManager.get_if_window(self.presenter, if_data)
+            self.if_win.focus()
+        else:
+            # cannot add if for selected device
+            can_not_add_if_dialog = ttk.dialogs.dialogs.Messagebox.show_warning(
+                message=WRONG_DEVICE_TEXT.format(selected_device.device_name),
+                title=WRONG_DEVICE_TITLE.format(selected_device.device_name),
+                parent=self,
+                alert=True
+                )
 
     def _cb_rem_if(self):
         """Remove if callback method"""
@@ -265,10 +280,10 @@ class Gui(ttk.Window):
             self.lst_device.insert(*data)
         self.lst_device.selection_set(0)
 
-    def cb_lst_select(self, event):
-        """"Callback method for element selection in list
+    def _cb_dev_lst_select(self, event):
+        """"Callback method for element selection in device list
 
-        when element selected from list, calls presenter to update the
+        when device is selected from device list, calls presenter to update the
         coresponding if list and DeviceData obj for Delete / Edit Device window
         """
 
@@ -276,20 +291,27 @@ class Gui(ttk.Window):
         if selection:
             # callback presenter to update active device in model
             self.presenter.handle_update_active_device(selection[0])
-            if self.presenter.handle_get_active_device().device_id == 0:
-                # All devices option selected in gui
-                if_list = self.presenter.handle_get_all_if()
-            else:
-                # callback presenter to get if list for curently selected device
-                if_list = self.presenter.handle_get_if_for_device(self.presenter.handle_get_active_device())
-            # write description to the right frame
-            # self.txt_device_desc.config(state=tk.NORMAL)
+            active_device = self.presenter.handle_get_active_device()
             self.txt_device_desc.delete(1.0, tk.END)
-            self.txt_device_desc.insert(tk.END, self.presenter.handle_get_active_device().device_desc)
-            # self.txt_device_desc.config(state=tk.DISABLED)
+            self.txt_device_desc.insert(tk.END, active_device.device_desc)
+
             # update interface list
-            self.tbl_list_if.build_table_data(coldata=data_types.COLDATA,
-                                              rowdata=if_list)
+            self.fill_if_table(active_device)
+
+    def fill_if_table(self, active_device):
+        """ Update if list object with new data
+
+        Update is done based on active device selected in Device list
+        and is filtered for All devices option
+        """
+
+        if active_device.device_id in BANNED_DEVICE_LIST:
+            # All devices option selected in gui
+            if_list = self.presenter.handle_get_all_if()
+        else:
+            # callback presenter to get if list for curently selected device
+            if_list = self.presenter.handle_get_if_for_device(active_device)
+        self.tbl_list_if.build_table_data(coldata=data_types.COLDATA, rowdata=if_list)
 
     def cb_tableview_select(self, event):
         """Callback method when element is selected in tableview"""
@@ -419,7 +441,10 @@ class WindowAddDevice(ttk.Toplevel):
 class WindowAddInterface(ttk.Toplevel):
     """Class implements add interface window"""
 
-    def __init__(self, win_title=WINDOW_ADD_INTERFACE_TITLE, if_data=data_types.default_if_data):
+    def __init__(self,
+                 presenter=None,
+                 win_title=WINDOW_ADD_INTERFACE_TITLE,
+                 if_data=data_types.default_if_data):
         """Create entire GUI frame
 
         win_tytle   = window title
@@ -433,6 +458,7 @@ class WindowAddInterface(ttk.Toplevel):
         self.resizable(False, False)
         # disable x close main window button
         self.protocol("WM_DELETE_WINDOW", disable_event)
+        self.presenter = presenter
         self._if_data = if_data
         self.create_add_interface_gui()
 
@@ -500,11 +526,22 @@ class WindowAddInterface(ttk.Toplevel):
 
     def _cb_if_save(self):
         """Callback method to save interface"""
-        self._cb_if_close
+        input_valid = self.check_ip_address(self._ip_name.get()) \
+            and self.check_mac_address(self._mac_name.get())
+        if_data = data_types.InterfaceData(if_id=0,
+                                           device_id=self._if_data.device_id,
+                                           ip=self._ip_name.get(),
+                                           mac=self._mac_name.get(),
+                                           if_type=self._type_name.get())
+        if input_valid:
+            self.presenter.handle_save_if_data(if_data)
+            self.presenter.handle_trigger_update_if_list()
+            self._cb_if_close()
 
     def _cb_if_close(self):
         """Callback method to close window"""
         IfWinManager.destroy_if_edit_window()
+        self.presenter.handle_trigger_update_if_list()
 
     def _cb_if_clear(self):
         """Callback method to clear IO fields"""
@@ -562,10 +599,11 @@ class IfWinManager:
     _if_edit_window = None
 
     @staticmethod
-    def get_if_window(if_data):
+    def get_if_window(presenter, if_data):
         """Returns a device edit window """
         if not IfWinManager._if_edit_window:
-            IfWinManager._if_edit_window = WindowAddInterface(if_data=if_data)
+            IfWinManager._if_edit_window = WindowAddInterface(presenter=presenter,
+                                                              if_data=if_data)
         return IfWinManager._if_edit_window
 
     @staticmethod

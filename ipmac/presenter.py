@@ -15,7 +15,6 @@ class Presenter:
 
     def handle_get_list_data(self):
         """Returns list data from model"""
-        # self.data.create_device_struct()
         return self.data.get_devices()
 
     def handle_update_active_device(self, idx):
@@ -54,6 +53,17 @@ class Presenter:
     def handle_get_all_if(self):
         """Returns formated interface list for all devices"""
         return self.data.get_all_if_data()
+
+    def handle_save_if_data(self, if_data):
+        """Triger save interface data to db"""
+        self.data.add_if_data(if_data)
+
+    def handle_trigger_update_if_list(self):
+        """Triger update if list in gui """
+        active_dev = self.handle_get_active_device()
+        self.handle_update_all_data()
+        self.handle_update_active_device(active_dev.device_id)
+        self.view.fill_if_table(active_dev)
 
     def run(self):
         """Run method of Presenter"""
