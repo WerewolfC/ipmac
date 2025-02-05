@@ -25,6 +25,12 @@ class Presenter:
         """Returns active DeviceData obj from model"""
         return self.data.get_active_device()
 
+    def handle_get_device_id(self, dev_name):
+        """Calls data method to retrieve device id
+        for a specified dev_name
+        """
+        return self.data.get_device_id(dev_name)
+
     def handle_save_device_data(self, data):
         """Triger save device data obj into model obj """
         self.data.add_device_data(data)
@@ -32,6 +38,10 @@ class Presenter:
     def handle_delete_device(self, data_obj):
         """Triger delete device data obj into model obj """
         self.data.delete_device_data(data_obj)
+
+    def handle_delete_if(self):
+        """Trigger delete selected interfaces """
+        self.data.delete_if_data(self.data.get_selected_if_list())
 
     def handle_update_device(self, data_obj):
         """Triger update device data obj into model obj """
@@ -60,10 +70,15 @@ class Presenter:
 
     def handle_trigger_update_if_list(self):
         """Triger update if list in gui """
-        active_dev = self.handle_get_active_device()
         self.handle_update_all_data()
+        active_dev = self.handle_get_active_device()
         self.handle_update_active_device(active_dev.device_id)
+        active_dev = self.handle_get_active_device()
         self.view.fill_if_table(active_dev)
+
+    def handle_update_selected_if_list(self, if_data_list):
+        """Trigger update selected interface list"""
+        self.data.update_selected_if_list(if_data_list)
 
     def run(self):
         """Run method of Presenter"""

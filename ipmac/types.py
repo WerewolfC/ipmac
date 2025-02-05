@@ -40,6 +40,16 @@ class DeviceData:
         yield from astuple(self)
 
 
+class DeviceNameNotFoundError(Exception):
+    """Device name not found custom Exception class"""
+    def __init__(self, message):
+        self.message = message
+
+class IfIdNotFoundError(Exception):
+    """Interface ID found custom Exception class"""
+    def __init__(self, message):
+        self.message = message
+
 default_device_data = DeviceData()
 default_if_data = InterfaceData()
 all_device_list = DeviceData(0, "All", "All available devices", ["*"])

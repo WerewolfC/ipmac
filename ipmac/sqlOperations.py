@@ -41,16 +41,22 @@ def get_all_devices(cursor):
 
 
 @db_operation
-def get_device_id(cursor, device_id=""):
+def get_device_id(cursor, device_name=""):
     """Return the device id based on device name"""
-    table_row = cursor.execute(queries.QUERY_GET_DEVICE_ID, [device_id]).fetchone()
+    table_row = cursor.execute(queries.QUERY_GET_DEVICE_ID, [device_name]).fetchone()
     return table_row[0]
 
+
+@db_operation
+def delete_from_if_table(cursor, if_id):
+    """Delete interface from interface table based on provided if_id"""
+    cursor.execute(queries.QUERY_DELETE_IF_ID, [if_id])
 
 @db_operation
 def delete_from_device_table(cursor, device_id):
     """Deletes from device table based on suplied idx"""
     cursor.execute(queries.QUERY_DELETE_DEVICE, [device_id])
+
 
 
 @db_operation

@@ -7,22 +7,19 @@ import ipmac.queries as queries
 
 
 STUB_DEVICE_DATA = [
-    ("Storm", "some other pc"),
-    ("Cyclops", "Multimedia PC"),
-    ("Wolverine", "Working pC"),
-    ("Jean", "masterpiece pc"),
-    ("Banshee", "Music PC"),
-    ("Xavier", "IP cam storage"),
+    ("1Storm", "some other pc"),
+    ("2Cyclops", "Multimedia PC"),
+    ("3Wolverine", "Working pC"),
 ]
 
 STUB_IF_DATA = [
     (1, "192.168.0.11", "00:11:22:33:44:55:16", 0),  # Storm
     (1, "192.168.0.111", "aa:11:22:33:44:55:16", 0),  # Storm
+    (1, "192.168.0.121", "aa:11:22:33:44:55:00", 0),  # Storm
     (2, "192.168.0.21", "00:11:22:33:44:55:26", 0),  # Cyclops
     (3, "192.168.0.31", "00:11:22:33:44:55:36", 0),  # Wolverine
-    (4, "192.168.0.41", "00:11:22:33:44:55:46", 0),  # Jean
-    (5, "192.168.0.41", "00:11:22:33:44:55:56", 0),  # Banshee
-    (6, "192.168.0.51", "00:11:22:33:44:55:66", 0),  # Xavier
+    (3, "192.0.0.0", "00:11:22:33:44:55:36", 0),  # Wolverine
+
 ]
 
 

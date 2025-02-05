@@ -90,6 +90,7 @@ class Gui(ttk.Window):
         self.add_top_frame()
         self.add_left_frame()
         self.add_rigth_frame()
+        self.presenter.handle_update_active_device(0)
         self.update_device_list()
 
     def add_top_frame(self):
@@ -160,10 +161,11 @@ class Gui(ttk.Window):
             rowdata=if_list,
             searchable=False,
             autofit=True,
+            autoalign=True
         )
         self.tbl_list_if.pack(side="bottom", expand=True, fill="both")
-        # self.tbl_list_if.bind("<<ButtonRelease-1>>", self.cb_tableview_select)
-        self.tbl_list_if.view.bind('<<TreeviewSelect>>', self.cb_tableview_select)
+        self.tbl_list_if.view.bind('<<TreeviewSelect>>', self.cb_tableview_if_select)
+        #self.tbl_list_if.view.bind('<Button-1>', self.cb_tableview_if_select)
 
         btn_add_if = ttk.Button(master=info_frame,
                                 text="+",
@@ -173,6 +175,7 @@ class Gui(ttk.Window):
         btn_rem_if = ttk.Button(master=info_frame,
                                 text="-",
                                 width=3,
+                                command=self._cb_rem_if,
                                 bootstyle="primary")
         btn_edit_if = ttk.Button(master=info_frame,
                                  text="...",
@@ -266,7 +269,11 @@ class Gui(ttk.Window):
 
     def _cb_rem_if(self):
         """Remove if callback method"""
-        pass
+        # check if selected_list is not empty
+        self.presenter.handle_delete_if()
+        self.presenter.handle_trigger_update_if_list()
+
+        # TODO: else display message - IF deleted ?
 
     def _cb_exit(self):
         """Exit app callback method"""
@@ -286,7 +293,6 @@ class Gui(ttk.Window):
         when device is selected from device list, calls presenter to update the
         coresponding if list and DeviceData obj for Delete / Edit Device window
         """
-
         selection = event.widget.curselection()
         if selection:
             # callback presenter to update active device in model
@@ -313,12 +319,29 @@ class Gui(ttk.Window):
             if_list = self.presenter.handle_get_if_for_device(active_device)
         self.tbl_list_if.build_table_data(coldata=data_types.COLDATA, rowdata=if_list)
 
-    def cb_tableview_select(self, event):
-        """Callback method when element is selected in tableview"""
-        selection = event.widget.selection()
-        # current_selection = self.tbl_list_if.selection_get()
-        current_selection = self.tbl_list_if.get_rows(selected=True)
-        # pprint(self.tbl_list_if.item(current_selection))
+    def cb_tableview_if_select(self, event):
+        """Callback method when one or multiple elements are selected in tableview"""
+
+        selected_rows = self.tbl_list_if.get_rows(selected=True)
+        selected_if_list = []
+        for row in selected_rows:
+            try:
+                dev_id= self.presenter.handle_get_device_id(row.values[0])
+            except data_types.DeviceNameNotFoundError as error:
+                # show message dialog
+                pass
+            else:
+                rev_lookup = {v: k for k, v in data_types.IF_TYPE.items()}
+                if_type_id = rev_lookup.get(row.values[3])
+                selected_if = data_types.InterfaceData(
+                        device_id=dev_id,
+                        ip=row.values[1],
+                        mac=row.values[2],
+                        if_type=if_type_id
+                    )
+                selected_if_list.append(selected_if)
+        #print(f"<--\n{selected_if_list}\n-->")
+        self.presenter.handle_update_selected_if_list(selected_if_list)
 
 
 class WindowAddDevice(ttk.Toplevel):

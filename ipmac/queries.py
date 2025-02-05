@@ -28,3 +28,6 @@ QUERY_UPDATE_DEVICE = """UPDATE tbl_devices
                          SET device_name = ?,
                             device_desc = ?
                          WHERE device_id = ?;"""
+
+QUERY_DELETE_IF_ID = """DELETE FROM tbl_interfaces
+                     WHERE if_id = ?;"""
