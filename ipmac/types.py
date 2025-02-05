@@ -19,6 +19,7 @@ GUI_STYLE_NAME = "sandstone"
 
 @dataclass
 class InterfaceData:
+    """Interface data class"""
     if_id: int = 0
     device_id: int = 0
     ip: str = ""
@@ -31,6 +32,7 @@ class InterfaceData:
 
 @dataclass
 class DeviceData:
+    """Device data class"""
     device_id: int = 0
     device_name: str = ""
     device_desc: str = ""

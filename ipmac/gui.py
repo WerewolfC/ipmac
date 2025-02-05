@@ -1,11 +1,10 @@
 """ GUI class"""
+import re
+
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.scrolled import ScrolledText
-import re
-from typing import Protocol
-from pprint import pprint
 
 import ipmac.types as data_types
 
@@ -31,43 +30,6 @@ BANNED_DEVICE_LIST = [0]
 def disable_event():
     """Empty function used to disable windows close x button"""
     pass
-
-
-class Presenter(Protocol):
-    """Protocol implementation for Presenter class"""
-
-    def handle_update_all_data(self):
-        ...
-
-    def handle_get_list_data(self):
-        ...
-
-    def handle_update_active_device(self, idx):
-        ...
-
-    def handle_get_active_device(self):
-        ...
-
-    def handle_save_device_data(self, device_obj):
-        ...
-
-    def handle_trigger_update_dev_list(self):
-        ...
-
-    def handle_delete_device(self, device_obj):
-        ...
-
-    def handle_update_device(self, device_obj):
-        ...
-
-    def handle_check_device(self, device_name):
-        ...
-
-    def handle_if_for_device(self, device_obj):
-        ...
-
-    def handle_get_all_if(sel):
-        ...
 
 
 class Gui(ttk.Window):
@@ -165,7 +127,6 @@ class Gui(ttk.Window):
         )
         self.tbl_list_if.pack(side="bottom", expand=True, fill="both")
         self.tbl_list_if.view.bind('<<TreeviewSelect>>', self.cb_tableview_if_select)
-        #self.tbl_list_if.view.bind('<Button-1>', self.cb_tableview_if_select)
 
         btn_add_if = ttk.Button(master=info_frame,
                                 text="+",
@@ -210,7 +171,8 @@ class Gui(ttk.Window):
 
     def _cb_add_device(self):
         """Add device callback method"""
-        self.device_win = DeviceWinManager.get_device_window(self.presenter, data_types.default_device_data)
+        self.device_win = DeviceWinManager.get_device_window(self.presenter,
+                                                             data_types.default_device_data)
         self.device_win.focus()
 
     def _cb_rem_device(self):
@@ -272,7 +234,6 @@ class Gui(ttk.Window):
         # check if selected_list is not empty
         self.presenter.handle_delete_if()
         self.presenter.handle_trigger_update_if_list()
-
         # TODO: else display message - IF deleted ?
 
     def _cb_exit(self):
@@ -328,7 +289,7 @@ class Gui(ttk.Window):
             try:
                 dev_id= self.presenter.handle_get_device_id(row.values[0])
             except data_types.DeviceNameNotFoundError as error:
-                # show message dialog
+                # TODO:show message dialog
                 pass
             else:
                 rev_lookup = {v: k for k, v in data_types.IF_TYPE.items()}
@@ -340,7 +301,6 @@ class Gui(ttk.Window):
                         if_type=if_type_id
                     )
                 selected_if_list.append(selected_if)
-        #print(f"<--\n{selected_if_list}\n-->")
         self.presenter.handle_update_selected_if_list(selected_if_list)
 
 
@@ -425,9 +385,9 @@ class WindowAddDevice(ttk.Toplevel):
         dev_data = data_types.DeviceData(self._device_data.device_id,
                                          target_name,
                                          self._txt_device_desc.get("1.0", tk.END))
+        # TODO: save when device already present
         # if dev_present and self.check_device_name:
         #     # dev is present, proceed with update data
-        #     print(f"device already present {dev_data}")
         #     self.presenter.handle_update_device(dev_data)
         # else:
         #     # add new device
@@ -635,32 +595,3 @@ class IfWinManager:
         if IfWinManager._if_edit_window:
             IfWinManager._if_edit_window.destroy()
         IfWinManager._if_edit_window = None
-
-
-if __name__ == "__main__":
-    # window = Gui("flatly")
-    # window.create_main_gui()
-    # window.mainloop()
-    # demo_device_data = {
-    #     "device_name": "Wolverine",
-    #     "device_desc": "some really reallty longlonglonglonglonglonglonglonglonglonglonglonglongllongong text text text text text text text text text text "
-    # }
-    add_window = WindowAddDevice(device_data=data_types.stub_device_data)
-    add_window.create_add_device_gui()
-    add_window.mainloop()
-    demo_if_data = {
-        "device_name": "Wolverine",
-        "ip": "192.168.0.100",
-        "mac": "AA:BB:CC:DD:EE:FF",
-        "type": "Wireless"
-    }
-    # demo_if_data = {
-    #     "device_name": "",
-    #     "ip": "",
-    #     "mac": "",
-    #     "type": "Wired"
-    # }
-    # print(demo_if_data)
-    # add_window = WindowAddInterface("flatly", win_title="Edit interface", if_data=demo_if_data)
-    # add_window.create_add_interface_gui()
-    # add_window.mainloop()

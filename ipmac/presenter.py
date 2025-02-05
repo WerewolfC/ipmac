@@ -1,3 +1,4 @@
+"""Presenter class"""
 from ipmac.gui import Gui
 from ipmac.dataModel import SqlData
 
