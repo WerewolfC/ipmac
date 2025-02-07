@@ -99,15 +99,32 @@ class Gui(ttk.Window):
                                     width=3,
                                     command=self._cb_rem_device,
                                     bootstyle="primary")
-        btn_edit_device = ttk.Button(master=device_actions_frame,
-                                     text="...",
-                                     width=3,
-                                     command=self._cb_edit_device,
-                                     bootstyle="primary")
-        btn_add_device.pack(side="left", padx=5, pady=5, anchor="w")
-        btn_rem_device.pack(side="left", padx=5, pady=5, anchor="w")
-        btn_edit_device.pack(side="left", padx=5, pady=5, anchor="w")
-        device_actions_frame.pack(side="bottom", expand=False, fill="both", padx=5, pady=5)
+        # TODO:
+        # btn_edit_device = ttk.Button(master=device_actions_frame,
+        #                              text="...",
+        #                              width=3,
+        #                              command=self._cb_edit_device,
+        #                              bootstyle="primary")
+        btn_add_device.pack(side="left", padx=2, pady=2, anchor="w")
+        btn_rem_device.pack(side="left", padx=2, pady=2, anchor="w")
+        #btn_edit_device.pack(side="left", padx=5, pady=5, anchor="w")
+        device_actions_frame.pack(side="top", expand=False, fill="both", padx=5, pady=5)
+
+        export_frame = ttk.Frame(device_frame)
+        btn_export_csv = ttk.Button(master=export_frame,
+                                    text="Export CSV",
+                                    width=10,
+                                    command=self._cb_export_csv,
+                                    bootstyle="primary")
+        btn_import_csv = ttk.Button(master=export_frame,
+                            text="Import CSV",
+                            width=10,
+                            command=self._cb_import_csv,
+                            bootstyle="primary")
+        btn_export_csv.pack(side="left", padx=2, pady=2, anchor="w")
+        btn_import_csv.pack(side="left", padx=2, pady=2, anchor="w")
+        export_frame.pack(side="bottom", expand=False, fill="both", padx=5, pady=5)
+
 
         device_frame.pack(side="left", expand=False, fill="both", padx=5, pady=5)
 
@@ -138,11 +155,12 @@ class Gui(ttk.Window):
                                 width=3,
                                 command=self._cb_rem_if,
                                 bootstyle="primary")
-        btn_edit_if = ttk.Button(master=info_frame,
-                                 text="...",
-                                 width=3,
-                                 command=self._cb_edit_if,
-                                 bootstyle="primary")
+        # TODO:
+        # btn_edit_if = ttk.Button(master=info_frame,
+        #                          text="...",
+        #                          width=3,
+        #                          command=self._cb_edit_if,
+        #                          bootstyle="primary")
         btn_copy_mac = ttk.Button(master=info_frame,
                                   text="cp MAC",
                                   width=5,
@@ -153,7 +171,7 @@ class Gui(ttk.Window):
                                  bootstyle="primary")
         btn_add_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_if.pack(side="left", padx=5, pady=5, anchor="w")
-        btn_edit_if.pack(side="left", padx=5, pady=5, anchor="w")
+        #btn_edit_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_copy_mac.pack(side="right", padx=5, pady=5, anchor="w")
         btn_copy_ip.pack(side="right", padx=5, pady=5, anchor="w")
         info_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5) #  info data frame
@@ -198,6 +216,15 @@ class Gui(ttk.Window):
                 parent=self,
                 alert=True
             )
+
+    def _cb_export_csv(self):
+        """Callback for export to csv procedure"""
+        self.presenter.handle_export_csv()
+
+    def _cb_import_csv(self):
+        """Callback for import from csv procedure"""
+        self.presenter.handle_import_csv()
+
 
     def _cb_edit_device(self):
         """Edit device callback method"""

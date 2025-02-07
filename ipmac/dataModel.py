@@ -110,7 +110,6 @@ class SqlData:
 
         self.active_device = [dev for dev in self.device_list if dev.device_id == active_id][0]
 
-
     def update_selected_if_list(self, if_data):
         """ Updates the selected interface based on if_id
         Based on if_data, the if_id is retrieved from self.device_list,
@@ -139,6 +138,14 @@ class SqlData:
         """Search for specified device name in a list of Device obj"""
         device_name_list = [return_name(dev_obj) for dev_obj in self.device_list]
         return device_name in device_name_list
+
+    def export_to_csv(self):
+        """Export DB to csv file"""
+        print("Export")
+
+    def import_from_csv(self):
+        """Import from csv file"""
+        print("Import")
 
 # from this down to be refactored
 

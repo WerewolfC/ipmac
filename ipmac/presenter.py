@@ -81,6 +81,14 @@ class Presenter:
         """Trigger update selected interface list"""
         self.data.update_selected_if_list(if_data_list)
 
+    def handle_export_csv(self):
+        """Trigger data export in csv"""
+        self.data.export_to_csv()
+
+    def handle_import_csv(self):
+        """Trigger data import from csv"""
+        self.data.import_from_csv()
+
     def run(self):
         """Run method of Presenter"""
         self.view.create_main_gui(self)
