@@ -254,10 +254,12 @@ class Gui(ttk.Window):
         when device is selected from device list, calls presenter to update the
         coresponding if list and DeviceData obj for Delete / Edit Device window
         """
+
         selection = event.widget.curselection()
         if selection:
             # callback presenter to update active device in model
-            self.presenter.handle_update_active_device(selection[0])
+            selected_dev_id = self.presenter.handle_get_device_id(self.lst_device.get(selection[0]))
+            self.presenter.handle_update_active_device(selected_dev_id)
             active_device = self.presenter.handle_get_active_device()
             self.txt_device_desc.delete(1.0, tk.END)
             self.txt_device_desc.insert(tk.END, active_device.device_desc)

@@ -87,8 +87,9 @@ class SqlData:
 
     def delete_if_data(self, if_obj_list):
         """Deletes interfaces from interface table"""
-        for if_id in [interface.if_id for interface in if_obj_list]:
-            db.delete_from_if_table(if_id)
+        if if_obj_list:
+            for if_id in [interface.if_id for interface in if_obj_list]:
+                db.delete_from_if_table(if_id)
 
     def update_data(self):
         """Get all elements from device and if tables """
@@ -106,7 +107,9 @@ class SqlData:
 
     def update_active_device(self, active_id):
         """Update active device based on info from presenter"""
+
         self.active_device = [dev for dev in self.device_list if dev.device_id == active_id][0]
+
 
     def update_selected_if_list(self, if_data):
         """ Updates the selected interface based on if_id
