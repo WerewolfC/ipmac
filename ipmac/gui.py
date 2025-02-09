@@ -5,6 +5,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.scrolled import ScrolledText
+import pyperclip
 
 import ipmac.types as data_types
 
@@ -25,7 +26,7 @@ WRONG_DEVICE_TITLE = "Cannot add interface for {0}"
 WRONG_DEVICE_TEXT = "{0} is not a valid device.\nPlease select a valid device"
 
 BANNED_DEVICE_LIST = [0]
-
+FORMAT_SEPARATOR = f"\n"
 
 def disable_event():
     """Empty function used to disable windows close x button"""
@@ -162,12 +163,14 @@ class Gui(ttk.Window):
         #                          command=self._cb_edit_if,
         #                          bootstyle="primary")
         btn_copy_mac = ttk.Button(master=info_frame,
-                                  text="cp MAC",
-                                  width=5,
+                                  text="Copy MAC",
+                                  width=10,
+                                  command=self._cb_mac_to_clipboard,
                                   bootstyle="primary")
         btn_copy_ip = ttk.Button(master=info_frame,
-                                 text="cp IP",
-                                 width=5,
+                                 text="Copy IP",
+                                 width=10,
+                                 command=self._cb_ip_to_clipboard,
                                  bootstyle="primary")
         btn_add_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_if.pack(side="left", padx=5, pady=5, anchor="w")
@@ -225,7 +228,6 @@ class Gui(ttk.Window):
         """Callback for import from csv procedure"""
         self.presenter.handle_import_csv()
 
-
     def _cb_edit_device(self):
         """Edit device callback method"""
         self.device_win = DeviceWinManager.get_device_window(self.presenter,
@@ -266,6 +268,16 @@ class Gui(ttk.Window):
     def _cb_exit(self):
         """Exit app callback method"""
         self.destroy()
+
+    def _cb_mac_to_clipboard(self):
+        """Copy selected mac to clipboard"""
+        pyperclip.copy(FORMAT_SEPARATOR.join(
+            self.presenter.handle_get_selected_mac_list()))
+
+    def _cb_ip_to_clipboard(self):
+        """Copy selected ip to clipboard"""
+        pyperclip.copy(FORMAT_SEPARATOR.join(
+            self.presenter.handle_get_selected_ip_list()))
 
     def update_device_list(self):
         """Callback the presenter handle and update the list widget"""

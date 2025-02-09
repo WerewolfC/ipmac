@@ -65,6 +65,14 @@ class Presenter:
         """Returns formated interface list for all devices"""
         return self.data.get_all_if_data()
 
+    def handle_get_selected_ip_list(self):
+        """Returns a list of selected IPs"""
+        return self.data.get_selected_ip_list()
+
+    def handle_get_selected_mac_list(self):
+        """Returns a list of selected MACs"""
+        return self.data.get_selected_mac_list()
+
     def handle_save_if_data(self, if_data):
         """Triger save interface data to db"""
         self.data.add_if_data(if_data)

@@ -72,6 +72,14 @@ class SqlData:
         """Get selected if object"""
         return self.selected_if_list
 
+    def get_selected_ip_list(self):
+        """Returns list of selected IPs """
+        return [iface.ip for iface in self.selected_if_list]
+
+    def get_selected_mac_list(self):
+        """Returns list of selected MACs """
+        return [iface.mac for iface in self.selected_if_list]
+
     def add_device_data(self, *args):
         """Writes device data to device table"""
         formated_data = tuple(args[0])[1:-1]
