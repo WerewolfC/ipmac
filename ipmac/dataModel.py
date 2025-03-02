@@ -14,6 +14,7 @@ class SqlData:
         self.device_list = None  # list of DeviceData obj
         self.active_device = None
         self.selected_if_list = None
+        self.querry_results = None  # list of tuples (dev_name, [if_obj]) matching results
 
     def get_devices(self):
         """Returns a list of (dev_id, device_name)"""
@@ -35,16 +36,22 @@ class SqlData:
         """Get active device object"""
         return self.active_device
 
-    def get_if_data(self, device_obj):
-        """Returns if data formated to be displayed, based on suplied device"""
-        # create a list of (dev_name, ip, mac, type) extracted from InterfaceData obj list
+    @staticmethod
+    def format_dev_if_list(dev_name, if_list):
+        """Returns a formated if list in order to be displayed on GUI"""
         formated_if_list = []
-        for ifx in device_obj.if_list:
-            formated_if_list.append((device_obj.device_name,
+        # create a list of (dev_name, ip, mac, type) extracted from InterfaceData obj list
+        for ifx in if_list:
+            formated_if_list.append((dev_name,
                                      ifx.ip,
                                      ifx.mac,
                                      IF_TYPE[ifx.if_type]))
         return formated_if_list
+
+    def get_if_data(self, device_obj):
+        """Returns if data formated to be displayed, based on suplied device"""
+        # returns a list of (dev_name, ip, mac, type) extracted from InterfaceData obj list
+        return self.format_dev_if_list(device_obj.device_name, device_obj.if_list)
 
     def get_all_if_data(self):
         """Returns all IF data formated"""
@@ -155,8 +162,42 @@ class SqlData:
         """Import from csv file"""
         print("Import")
 
-# from this down to be refactored
+    @staticmethod
+    def is_match(searched_str, data_str):
+        """Returns True if the data_string mathches search_string"""
+        return searched_str.lower() in data_str.lower()
 
-    def search_in_db(self):
-        """Search in SQLite db"""
-        pass
+    def search(self, search_str):
+        """Search in self.device_list and saves a list of tuples (dev_name, interface_list)
+        that match the searched string and returns number of found items
+        """
+        self.querry_results = []
+        found_count = 0
+        for device in self.device_list[1:]:
+            # If device name or device description matches string, add all interfaces
+            if self.is_match(search_str, device.device_name) \
+                or self.is_match(search_str, device.device_desc):
+                self.querry_results.append((device.device_name, device.if_list))
+                found_count += len(device.if_list)
+                continue
+            else:
+                # if device data does not match, search in device if list
+                if_list = []
+                for device_if in device.if_list:
+                    if self.is_match(search_str, device_if.ip) \
+                        or self.is_match(search_str, device_if.mac) \
+                        or self.is_match(search_str, IF_TYPE[device_if.if_type]):
+                        if_list.append(device_if)
+                        found_count += 1
+                # if search_str found in interfaces add dev_name and if_list to results
+                if if_list :
+                    self.querry_results.append((device.device_name, if_list))
+        return found_count
+
+    def get_formated_results(self):
+        """Returns full list of formated interface data to be displayed on GUI"""
+        full_formated_list = []
+        for dev_name, if_list in self.querry_results:
+            full_formated_list.extend(self.format_dev_if_list(dev_name, if_list))
+
+        return full_formated_list

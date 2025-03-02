@@ -24,6 +24,8 @@ DEVICE_EXISTS_TITLE = "Cannot remove {0}"
 DEVICE_EXISTS_TEXT = """There are interfaces defined for this device.\nDelete existing interfaces first"""
 WRONG_DEVICE_TITLE = "Cannot add interface for {0}"
 WRONG_DEVICE_TEXT = "{0} is not a valid device.\nPlease select a valid device"
+NO_SEARCH_RESULTS_TITLE = "Search results"
+NO_SEARCH_RESULTS_TEXT = "No results found for {0} "
 
 BANNED_DEVICE_LIST = [0]
 FORMAT_SEPARATOR = f"\n"
@@ -61,14 +63,15 @@ class Gui(ttk.Window):
 
         search_frame = ttk.Frame(self)
         # add input field
-        search_text = tk.StringVar()
-        textbox = ttk.Entry(search_frame, textvariable=search_text, width=50)
+        self.search_text = tk.StringVar()
+        textbox = ttk.Entry(search_frame, textvariable=self.search_text, width=50)
         textbox.focus()
         textbox.pack(side="left", expand=True, fill="x", padx=5, pady=5)
 
         # add search button
         btn_search = ttk.Button(master=search_frame,
                                 text="Search",
+                                command=self._cb_search,
                                 width=10,
                                 bootstyle="primary")
         btn_search.pack(side="right", padx=5, pady=5, anchor="w")
@@ -343,6 +346,21 @@ class Gui(ttk.Window):
                     )
                 selected_if_list.append(selected_if)
         self.presenter.handle_update_selected_if_list(selected_if_list)
+
+    def _cb_search(self):
+        """Callback for presenter to search for requested data"""
+        count_found, result_data = self.presenter.handle_search_results(self.search_text.get())
+        if count_found > 0:
+            self.tbl_list_if.build_table_data(coldata=data_types.COLDATA,
+                                                 rowdata=result_data)
+        else:
+            # there are no results
+            no_results_dialog = ttk.dialogs.dialogs.Messagebox.show_info(
+                message=NO_SEARCH_RESULTS_TEXT.format(self.search_text.get()),
+                title=NO_SEARCH_RESULTS_TITLE,
+                parent=self,
+                alert=True
+            )
 
 
 class WindowAddDevice(ttk.Toplevel):

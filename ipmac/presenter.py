@@ -97,6 +97,13 @@ class Presenter:
         """Trigger data import from csv"""
         self.data.import_from_csv()
 
+    def handle_search_results(self, searched_string):
+        """Call for data to search string in data model
+        and returns is-found status and data
+        """
+        return self.data.search(searched_string), \
+                self.data.get_formated_results()
+
     def run(self):
         """Run method of Presenter"""
         self.view.create_main_gui(self)
