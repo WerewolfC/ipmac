@@ -536,10 +536,12 @@ class WindowAddInterface(ttk.Toplevel):
         frm_type = ttk.Frame(self)
         lbl_type = ttk.Label(frm_type, width=15, text="Interface type:", anchor="w")
         lbl_type.pack(side="left", expand="True", fill="x")
-        self._type_name = tk.IntVar()
-        self.combo_type = ttk.Combobox(frm_type, state="readonly", values=list(data_types.IF_TYPE.values()))
-        found_key = [idx for idx, val in data_types.IF_TYPE.items() if val == self._if_data.if_type]
-        self.combo_type.current(found_key if found_key else 0)
+        self._type_name = tk.StringVar()
+        self.combo_type = ttk.Combobox(frm_type,
+                                       state="readonly",
+                                       textvariable=self._type_name,
+                                       values=list(data_types.IF_TYPE.values()))
+        self.combo_type.current(0)
         self.combo_type.pack(side="left", expand=True, fill="x")
 
         frm_buttons = ttk.Frame(self)
@@ -570,11 +572,12 @@ class WindowAddInterface(ttk.Toplevel):
         """Callback method to save interface"""
         input_valid = self.check_ip_address(self._ip_name.get()) \
             and self.check_mac_address(self._mac_name.get())
+        if_type_int = [idx for idx, val in data_types.IF_TYPE.items() if val == self._type_name.get()][0]
         if_data = data_types.InterfaceData(if_id=0,
                                            device_id=self._if_data.device_id,
                                            ip=self._ip_name.get(),
                                            mac=self._mac_name.get(),
-                                           if_type=self._type_name.get())
+                                           if_type=if_type_int)
         if input_valid:
             self.presenter.handle_save_if_data(if_data)
             self.presenter.handle_trigger_update_if_list()
