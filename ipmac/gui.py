@@ -1,5 +1,4 @@
 """ GUI class"""
-import re
 
 import tkinter as tk
 import ttkbootstrap as ttk
@@ -8,6 +7,7 @@ from ttkbootstrap.scrolled import ScrolledText
 import pyperclip
 
 import ipmac.types as data_types
+from ipmac.generic_functions import check_device_name, check_ip_address, check_mac_address
 
 # window params
 WINDOW_MAIN_SIZE = "800x450"
@@ -393,7 +393,7 @@ class WindowAddDevice(ttk.Toplevel):
         lbl_device_name = ttk.Label(frm_device_name, text="Device name:", width=20)
         lbl_device_name.pack(side="left", expand=True, fill="x", anchor="w")
 
-        validate_device_name = self.register(self.check_device_name)
+        validate_device_name = self.register(check_device_name)
         self._device_name = tk.StringVar(value=self._device_data.device_name)
         ent_device_name = ttk.Entry(frm_device_name,
                                     validate="focus",
@@ -469,16 +469,6 @@ class WindowAddDevice(ttk.Toplevel):
         self._device_desc = ""
         self._txt_device_desc.delete("1.0", tk.END)
 
-    @staticmethod
-    def check_device_name(dev_name):
-        """Validate device name
-        Rules:
-            -not empty
-            -alphanumeric [0..9][aA..ZA]
-        """
-        valid_pattern = r"^[a-zA-Z0-9]+$"
-        return bool(re.match(valid_pattern, dev_name))
-
 
 class WindowAddInterface(ttk.Toplevel):
     """Class implements add interface window"""
@@ -507,8 +497,8 @@ class WindowAddInterface(ttk.Toplevel):
     def create_add_interface_gui(self):
         """Create add interface window"""
         # register validation _callback
-        validate_ip_address = self.register(self.check_ip_address)
-        validate_mac_address = self.register(self.check_mac_address)
+        validate_ip_address = self.register(check_ip_address)
+        validate_mac_address = self.register(check_mac_address)
 
         frm_ip = ttk.Frame(self)
         lbl_ip = ttk.Label(frm_ip, width=15, text="IP address:", anchor="w")
@@ -570,8 +560,8 @@ class WindowAddInterface(ttk.Toplevel):
 
     def _cb_if_save(self):
         """Callback method to save interface"""
-        input_valid = self.check_ip_address(self._ip_name.get()) \
-            and self.check_mac_address(self._mac_name.get())
+        input_valid = check_ip_address(self._ip_name.get()) \
+            and check_mac_address(self._mac_name.get())
         if_type_int = [idx for idx, val in data_types.IF_TYPE.items() if val == self._type_name.get()][0]
         if_data = data_types.InterfaceData(if_id=0,
                                            device_id=self._if_data.device_id,
@@ -595,28 +585,6 @@ class WindowAddInterface(ttk.Toplevel):
         self._mac_name.set("")
         self._type_name = 0
         self.combo_type.current(0)
-
-    @staticmethod
-    def check_ip_address(ip_name):
-        """Validate IP address
-        Rules:
-            - max len 15
-            - digits only
-            - 3 dots
-        """
-        valid_pattern = r"^(\d{1,3}[.]){3}(\d{1,3})$"
-        return bool(re.match(valid_pattern, ip_name))
-
-    @staticmethod
-    def check_mac_address(mac_name):
-        """Validate MAC address
-        Rules:
-            - max len 17
-            - HEXA only
-            - 5 column char
-        """
-        valid_pattern = r"^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$"
-        return bool(re.match(valid_pattern, mac_name.upper()))
 
 
 class DeviceWinManager:
