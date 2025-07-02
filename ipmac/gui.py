@@ -4,6 +4,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.tooltip import ToolTip
 import pyperclip
 
 import ipmac.types as data_types
@@ -26,9 +27,15 @@ WRONG_DEVICE_TITLE = "Cannot add interface for {0}"
 WRONG_DEVICE_TEXT = "{0} is not a valid device.\nPlease select a valid device"
 NO_SEARCH_RESULTS_TITLE = "Search results"
 NO_SEARCH_RESULTS_TEXT = "No results found for {0} "
+DUPLICATE_DEVICE_TEXT = "Device {0} already exists in database"
+DUPLICATE_DEVICE_TITLE = "Cannot add {0}"
 
 BANNED_DEVICE_LIST = [0]
 FORMAT_SEPARATOR = f"\n"
+
+# tooltip messages
+TOOLTIP_DEVICE_NAME = "Device name must contain only [a-zA-Z0-9]"
+
 
 def disable_event():
     """Empty function used to disable windows close x button"""
@@ -47,6 +54,11 @@ class Gui(ttk.Window):
         self.presenter = None
         # disable x close main window button
         self.protocol("WM_DELETE_WINDOW", disable_event)
+        self.if_win = None
+        self.search_text = None
+        self.lst_device = None
+        self.tbl_list_if = None
+        self.txt_device_desc = None
 
     def create_main_gui(self, presenter):
         """Create main window"""
@@ -103,15 +115,14 @@ class Gui(ttk.Window):
                                     width=3,
                                     command=self._cb_rem_device,
                                     bootstyle="primary")
-        # TODO:
-        # btn_edit_device = ttk.Button(master=device_actions_frame,
-        #                              text="...",
-        #                              width=3,
-        #                              command=self._cb_edit_device,
-        #                              bootstyle="primary")
+        btn_edit_device = ttk.Button(master=device_actions_frame,
+                                     text="...",
+                                     width=3,
+                                     command=self._cb_edit_device,
+                                     bootstyle="primary")
         btn_add_device.pack(side="left", padx=2, pady=2, anchor="w")
         btn_rem_device.pack(side="left", padx=2, pady=2, anchor="w")
-        #btn_edit_device.pack(side="left", padx=5, pady=5, anchor="w")
+        btn_edit_device.pack(side="left", padx=2, pady=2, anchor="w")
         device_actions_frame.pack(side="top", expand=False, fill="both", padx=5, pady=5)
 
         export_frame = ttk.Frame(device_frame)
@@ -363,7 +374,7 @@ class Gui(ttk.Window):
             )
 
 
-class WindowAddDevice(ttk.Toplevel):
+class WindowDevice(ttk.Toplevel):
     """Class implements add device window"""
 
     def __init__(self,
@@ -380,18 +391,18 @@ class WindowAddDevice(ttk.Toplevel):
         super().__init__()
         self.title(win_title)
         self.geometry(WINDOW_ADD_DEVICE_SIZE)
-        # disable x close main window button
-        self.protocol("WM_DELETE_WINDOW", disable_event)
+        self.protocol("WM_DELETE_WINDOW", disable_event)  # disable x close main window button
         self.resizable(False, False)
         self.presenter = presenter
         self._device_data = device_data
+        print(self._device_data)
         self.create_add_device_gui()
 
     def create_add_device_gui(self):
         """Create add device window"""
         frm_device_name = ttk.Frame(self)
-        lbl_device_name = ttk.Label(frm_device_name, text="Device name:", width=20)
-        lbl_device_name.pack(side="left", expand=True, fill="x", anchor="w")
+        lbl_device_name = ttk.Label(frm_device_name, text="Device name:")
+        lbl_device_name.pack(side="left", expand=True, fill="x")
 
         validate_device_name = self.register(check_device_name)
         self._device_name = tk.StringVar(value=self._device_data.device_name)
@@ -399,12 +410,12 @@ class WindowAddDevice(ttk.Toplevel):
                                     validate="focus",
                                     validatecommand=(validate_device_name, '%P'),
                                     textvariable=self._device_name,
-                                    width=20)
+                                    width=40)
         ent_device_name.focus()
         ent_device_name.pack(side="top", expand=True, fill="x")
 
         frm_device_desc = ttk.Frame(self)
-        lbl_device_desc = ttk.Label(frm_device_desc, text="Description:", width=20)
+        lbl_device_desc = ttk.Label(frm_device_desc, text="Description:")
         lbl_device_desc.pack(side="top", expand=True, fill="x")
         self._txt_device_desc = ScrolledText(frm_device_desc, autohide=True, height=5)
         self._txt_device_desc.insert("1.0", self._device_data.device_desc)
@@ -413,18 +424,22 @@ class WindowAddDevice(ttk.Toplevel):
         frm_buttons = ttk.Frame(self)
         btn_save_dev = ttk.Button(master=frm_buttons,
                                   text="Save",
+                                  width=10,
                                   command=self._cb_device_save,
                                   bootstyle="primary")
         btn_clear_dev = ttk.Button(master=frm_buttons,
                                    text="Clear",
-                                   width=5,
+                                   width=10,
                                    command=self._cb_device_clear,
                                    bootstyle="primary")
         btn_close_dev = ttk.Button(master=frm_buttons,
                                    text="Close",
-                                   width=5,
+                                   width=10,
                                    command=self._cb_device_close,
                                    bootstyle="primary")
+
+        ToolTip(ent_device_name, text=TOOLTIP_DEVICE_NAME)
+
         btn_save_dev.pack(side="left", padx=5, pady=5, anchor="w")
         btn_clear_dev.pack(side="left", padx=5, pady=5, anchor="w")
         btn_close_dev.pack(side="left", padx=5, pady=5, anchor="w")
@@ -440,22 +455,28 @@ class WindowAddDevice(ttk.Toplevel):
         otherwise update existing device
         """
         target_name = self._device_name.get().capitalize()
-        dev_present = self.presenter.handle_check_device(target_name)
+        if not check_device_name(target_name):
+            return
+
         dev_data = data_types.DeviceData(self._device_data.device_id,
                                          target_name,
                                          self._txt_device_desc.get("1.0", tk.END))
-        # TODO: save when device already present
-        # if dev_present and self.check_device_name:
-        #     # dev is present, proceed with update data
-        #     self.presenter.handle_update_device(dev_data)
-        # else:
-        #     # add new device
-        #     self.presenter.handle_save_device_data(dev_data)
-        #     self._cb_device_close()
-        if self.check_device_name(self._device_name.get()):
-            #  add new device
-            self.presenter.handle_save_device_data(dev_data)
-            self._cb_device_close()
+
+        # device_id = 0 : new device is being added else device is being updated
+        if dev_data.device_id:
+            self.presenter.handle_update_device(dev_data)
+        else:
+            # check if device name already exists, and if so message
+            if self.presenter.handle_check_device(target_name):
+                 can_not_add_device_dialog = ttk.dialogs.dialogs.Messagebox.show_warning(
+                message=DUPLICATE_DEVICE_TEXT.format(target_name),
+                title=DUPLICATE_DEVICE_TITLE.format(target_name),
+                parent=self,
+                alert=True
+                )
+            else:
+                self.presenter.handle_save_device_data(dev_data)
+                self._cb_device_close()
 
     def _cb_device_close(self):
         """Callback method to close window"""
@@ -488,8 +509,7 @@ class WindowAddInterface(ttk.Toplevel):
         self.title(win_title)
         self.geometry(WINDOW_ADD_INTERFACE_SIZE)
         self.resizable(False, False)
-        # disable x close main window button
-        self.protocol("WM_DELETE_WINDOW", disable_event)
+        self.protocol("WM_DELETE_WINDOW", disable_event)   # disable x close main window button
         self.presenter = presenter
         self._if_data = if_data
         self.create_add_interface_gui()
@@ -595,7 +615,7 @@ class DeviceWinManager:
     def get_device_window(presenter, dev_data):
         """Returns a device edit window """
         if not DeviceWinManager._device_edit_window:
-            DeviceWinManager._device_edit_window = WindowAddDevice(presenter=presenter,
+            DeviceWinManager._device_edit_window = WindowDevice(presenter=presenter,
                                                                    device_data=dev_data)
         return DeviceWinManager._device_edit_window
 
