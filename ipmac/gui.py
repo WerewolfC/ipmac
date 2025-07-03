@@ -457,6 +457,7 @@ class WindowDevice(ttk.Toplevel):
         # device_id = 0 : new device is being added else device is being updated
         if dev_data.device_id:
             self.presenter.handle_update_device(dev_data)
+            self._cb_device_close()
         else:
             # check if device name already exists, and if so message
             if self.presenter.handle_check_device(target_name):
