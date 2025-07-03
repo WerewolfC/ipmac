@@ -184,7 +184,8 @@ class Gui(ttk.Window):
         info_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5) #  info data frame
 
         desc_frame = ttk.Frame(self) #  description frame
-        self.txt_device_desc = ScrolledText(desc_frame, autohide=True, height=3, width=80)
+        self.txt_device_desc = tk.Text(desc_frame, height=3, width=80)
+        self.txt_device_desc.configure(state=tk.DISABLED)
         self.txt_device_desc.pack(side="left", expand=False)
         btn_exit_app = ttk.Button(master=desc_frame,
                                   text="Exit",
@@ -304,8 +305,10 @@ class Gui(ttk.Window):
             selected_dev_id = self.presenter.handle_get_device_id(self.lst_device.get(selection[0]))
             self.presenter.handle_update_active_device(selected_dev_id)
             active_device = self.presenter.handle_get_active_device()
+            self.txt_device_desc.configure(state=tk.NORMAL)
             self.txt_device_desc.delete(1.0, tk.END)
             self.txt_device_desc.insert(tk.END, active_device.device_desc)
+            self.txt_device_desc.configure(state=tk.DISABLED)
 
             # update interface list
             self.fill_if_table(active_device)
