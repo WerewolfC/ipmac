@@ -120,28 +120,18 @@ class Gui(ttk.Window):
                                      width=3,
                                      command=self._cb_edit_device,
                                      bootstyle="primary")
-        btn_add_device.pack(side="left", padx=2, pady=2, anchor="w")
-        btn_rem_device.pack(side="left", padx=2, pady=2, anchor="w")
-        btn_edit_device.pack(side="left", padx=2, pady=2, anchor="w")
+        btn_add_device.pack(side="left", padx=7, pady=2, anchor="w")
+        btn_rem_device.pack(side="left", padx=7, pady=2, anchor="w")
+        btn_edit_device.pack(side="left", padx=7, pady=2, anchor="w")
         device_actions_frame.pack(side="top", expand=False, fill="both", padx=5, pady=5)
 
-        export_frame = ttk.Frame(device_frame)
-        btn_export_csv = ttk.Button(master=export_frame,
-                                    text="Export CSV",
-                                    width=10,
-                                    command=self._cb_export_csv,
-                                    bootstyle="primary")
-        btn_import_csv = ttk.Button(master=export_frame,
-                            text="Import CSV",
-                            width=10,
-                            command=self._cb_import_csv,
-                            bootstyle="primary")
-        btn_export_csv.pack(side="left", padx=2, pady=2, anchor="w")
-        btn_import_csv.pack(side="left", padx=2, pady=2, anchor="w")
-        export_frame.pack(side="bottom", expand=False, fill="both", padx=5, pady=5)
+        status_frame = ttk.Frame(device_frame)
+        self.status_detail = tk.Text(status_frame, height=2, width=20)
+        self.status_detail.configure(state=tk.DISABLED)
+        self.status_detail.pack(side="left", expand=True, fill="both", padx=5, pady=5)
+        status_frame.pack(side="bottom", expand=False, fill="both", padx=5, pady=5)
 
-
-        device_frame.pack(side="left", expand=False, fill="both", padx=5, pady=5)
+        device_frame.pack(side="left", expand=True, fill="both")
 
     def add_rigth_frame(self):
         """Create details frame"""
@@ -195,7 +185,7 @@ class Gui(ttk.Window):
 
         desc_frame = ttk.Frame(self) #  description frame
         self.txt_device_desc = ScrolledText(desc_frame, autohide=True, height=3, width=80)
-        self.txt_device_desc.pack(side="left", expand=False, padx=5, pady=5)
+        self.txt_device_desc.pack(side="left", expand=False)
         btn_exit_app = ttk.Button(master=desc_frame,
                                   text="Exit",
                                   command=self._cb_exit,
@@ -395,7 +385,6 @@ class WindowDevice(ttk.Toplevel):
         self.resizable(False, False)
         self.presenter = presenter
         self._device_data = device_data
-        print(self._device_data)
         self.create_add_device_gui()
 
     def create_add_device_gui(self):
