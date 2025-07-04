@@ -226,14 +226,6 @@ class Gui(ttk.Window):
                 alert=True
             )
 
-    def _cb_export_csv(self):
-        """Callback for export to csv procedure"""
-        self.presenter.handle_export_csv()
-
-    def _cb_import_csv(self):
-        """Callback for import from csv procedure"""
-        self.presenter.handle_import_csv()
-
     def _cb_edit_device(self):
         """Edit device callback method"""
         self.device_win = DeviceWinManager.get_device_window(self.presenter,
@@ -593,11 +585,9 @@ class WindowInterface(ttk.Toplevel):
                                                ip=self._ip_name.get(),
                                                mac=self._mac_name.get(),
                                                if_type=if_type_int)
-            print(f" new data {if_data}")
             self.presenter.handle_save_if_data(if_data)
         else:
             # modify existing if
-            print(f"pass validation if data {self._if_data}")
             # check for changes
             if self._if_data.ip != self._ip_name.get() \
                 or self._if_data.mac != self._mac_name.get()\
@@ -606,8 +596,6 @@ class WindowInterface(ttk.Toplevel):
                 self._if_data.ip = self._ip_name.get()
                 self._if_data.mac = self._mac_name.get()
                 self._if_data.if_type = if_type_int
-
-                print(f"modified data {self._if_data}")
                 self.presenter.handle_update_if_data(self._if_data)
 
         self.presenter.handle_trigger_update_if_list()

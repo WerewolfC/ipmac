@@ -89,7 +89,6 @@ if __name__ == "__main__":
     # for item in zipped_data:
     #     add_to_if_table((item[0], *item[1]))
     for item in STUB_IF_DATA:
-        print(item)
         add_to_if_table(item)
     pprint.pprint(read_all_devices())
     pprint.pprint(read_all_interfaces())

@@ -64,7 +64,6 @@ class SqlData:
 
     def get_selected_if_list(self):
         """Get selected if object"""
-        print(self.selected_if_list)
         return self.selected_if_list
 
     def get_selected_ip_list(self):
@@ -149,14 +148,6 @@ class SqlData:
         """Search for specified device name in a list of Device obj"""
         device_name_list = [return_name(dev_obj) for dev_obj in self.device_list]
         return device_name in device_name_list
-
-    def export_to_csv(self):
-        """Export DB to csv file"""
-        print("Export")
-
-    def import_from_csv(self):
-        """Import from csv file"""
-        print("Import")
 
     def search(self, search_str):
         """Search in self.device_list and saves a list of tuples (dev_name, interface_list)
