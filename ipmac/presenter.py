@@ -40,9 +40,17 @@ class Presenter:
         """Triger delete device data obj into model obj """
         self.data.delete_device_data(data_obj)
 
+    def handle_get_active_if(self):
+        """Returns the active selected if"""
+        return self.data.get_selected_if_list()[0]
+
     def handle_delete_if(self):
         """Trigger delete selected interfaces """
         self.data.delete_if_data(self.data.get_selected_if_list())
+
+    def handle_update_if_data(self, if_data_obj):
+        """Trigger update if data with new data"""
+        self.data.update_if_data(if_data_obj)
 
     def handle_update_device(self, data_obj):
         """Triger update device data obj into model obj """

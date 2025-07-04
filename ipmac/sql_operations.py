@@ -60,3 +60,8 @@ def delete_from_device_table(cursor, device_id):
 def update_device_table(cursor, *args):
     """Update device table based on suplied idx"""
     cursor.execute(queries.QUERY_UPDATE_DEVICE, *args)
+
+@db_operation
+def update_if_table(cursor, *args):
+    """Update if table based on suplied idx"""
+    cursor.execute(queries.QUERY_UPDATE_IF, *args)

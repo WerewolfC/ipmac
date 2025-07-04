@@ -31,3 +31,9 @@ QUERY_UPDATE_DEVICE = """UPDATE tbl_devices
 
 QUERY_DELETE_IF_ID = """DELETE FROM tbl_interfaces
                      WHERE if_id = ?;"""
+
+QUERY_UPDATE_IF = """UPDATE tbl_interfaces
+                         SET ip = ?,
+                             mac = ?,
+                             if_type = ?
+                         WHERE if_id = ?;"""

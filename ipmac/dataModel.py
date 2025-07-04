@@ -64,6 +64,7 @@ class SqlData:
 
     def get_selected_if_list(self):
         """Get selected if object"""
+        print(self.selected_if_list)
         return self.selected_if_list
 
     def get_selected_ip_list(self):
@@ -135,6 +136,14 @@ class SqlData:
                          args[0].device_desc,
                          args[0].device_id)
         db.update_device_table(formated_data)
+
+    def update_if_data(self, *args):
+        """Update if data in if table"""
+        formated_data = (args[0].ip,
+                         args[0].mac,
+                         args[0].if_type,
+                         args[0].if_id)
+        db.update_if_table(formated_data)
 
     def is_device_present(self, device_name):
         """Search for specified device name in a list of Device obj"""

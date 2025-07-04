@@ -13,9 +13,9 @@ from ipmac.generic_functions import check_device_name, check_ip_address, check_m
 # window params
 WINDOW_MAIN_SIZE = "800x450"
 WINDOW_MAIN_TITLE = "IPMac utility"
-WINDOW_ADD_DEVICE_SIZE = "350x210"
+WINDOW_ADD_DEVICE_SIZE = "300x210"
 WINDOW_ADD_DEVICE_TITLE = "Add new device"
-WINDOW_ADD_INTERFACE_SIZE = "350x180"
+WINDOW_ADD_INTERFACE_SIZE = "300x170"
 WINDOW_ADD_INTERFACE_TITLE = "Add new interface"
 
 # message dialogs
@@ -35,6 +35,8 @@ FORMAT_SEPARATOR = f"\n"
 
 # tooltip messages
 TOOLTIP_DEVICE_NAME = "Device name must contain only [a-zA-Z0-9]"
+TOOLTIP_IP = "IP format 123.123.123.123"
+TOOLTIP_MAC = "MAC format aa:bb:cc:dd:ee:ff"
 
 
 def disable_event():
@@ -160,12 +162,11 @@ class Gui(ttk.Window):
                                 width=3,
                                 command=self._cb_rem_if,
                                 bootstyle="primary")
-        # TODO:
-        # btn_edit_if = ttk.Button(master=info_frame,
-        #                          text="...",
-        #                          width=3,
-        #                          command=self._cb_edit_if,
-        #                          bootstyle="primary")
+        btn_edit_if = ttk.Button(master=info_frame,
+                                 text="...",
+                                 width=3,
+                                 command=self._cb_edit_if,
+                                 bootstyle="primary")
         btn_copy_mac = ttk.Button(master=info_frame,
                                   text="Copy MAC",
                                   width=10,
@@ -178,7 +179,7 @@ class Gui(ttk.Window):
                                  bootstyle="primary")
         btn_add_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_rem_if.pack(side="left", padx=5, pady=5, anchor="w")
-        #btn_edit_if.pack(side="left", padx=5, pady=5, anchor="w")
+        btn_edit_if.pack(side="left", padx=5, pady=5, anchor="w")
         btn_copy_mac.pack(side="right", padx=5, pady=5, anchor="w")
         btn_copy_ip.pack(side="right", padx=5, pady=5, anchor="w")
         info_frame.pack(side="top", expand=True, fill="both", padx=5, pady=5) #  info data frame
@@ -242,7 +243,8 @@ class Gui(ttk.Window):
     def _cb_edit_if(self):
         """Add if callback method"""
         # TODO : replace stub with actual data from DB
-        self.if_win = IfWinManager.get_if_window(data_types.stub_if_data)
+        self.if_win = IfWinManager.get_if_window(self.presenter,
+                                                 self.presenter.handle_get_active_if())
         self.if_win.focus()
 
     def _cb_add_if(self):
@@ -484,7 +486,7 @@ class WindowDevice(ttk.Toplevel):
         self._txt_device_desc.delete("1.0", tk.END)
 
 
-class WindowAddInterface(ttk.Toplevel):
+class WindowInterface(ttk.Toplevel):
     """Class implements add interface window"""
 
     def __init__(self,
@@ -520,10 +522,11 @@ class WindowAddInterface(ttk.Toplevel):
                                 validate="focus",
                                 validatecommand=(validate_ip_address, '%P'),
                                 textvariable=self._ip_name,
-                                width=20)
+                                width=25)
         ent_ip_name.focus()
         lbl_ip.pack(side="left", expand=True, fill="x")
         ent_ip_name.pack(side="left", expand=True, fill="x")
+        ToolTip(ent_ip_name, text=TOOLTIP_IP)
 
         frm_mac = ttk.Frame(self)
         lbl_mac = ttk.Label(frm_mac, width=15, text="MAC address:", anchor="w")
@@ -532,9 +535,10 @@ class WindowAddInterface(ttk.Toplevel):
                                  validate="focus",
                                  validatecommand=(validate_mac_address, '%P'),
                                  textvariable=self._mac_name,
-                                 width=20)
+                                 width=25)
         lbl_mac.pack(side="left", expand="True", fill="x")
         ent_mac_name.pack(side="left", expand=True, fill="x")
+        ToolTip(ent_mac_name, text=TOOLTIP_MAC)
 
         frm_type = ttk.Frame(self)
         lbl_type = ttk.Label(frm_type, width=15, text="Interface type:", anchor="w")
@@ -543,23 +547,25 @@ class WindowAddInterface(ttk.Toplevel):
         self.combo_type = ttk.Combobox(frm_type,
                                        state="readonly",
                                        textvariable=self._type_name,
-                                       values=list(data_types.IF_TYPE.values()))
-        self.combo_type.current(0)
+                                       values=list(data_types.IF_TYPE.values()),
+                                       width=23)
+        self.combo_type.current(self._if_data.if_type)
         self.combo_type.pack(side="left", expand=True, fill="x")
 
         frm_buttons = ttk.Frame(self)
         btn_save_if = ttk.Button(master=frm_buttons,
                                  text="Save",
                                  command=self._cb_if_save,
+                                 width=10,
                                  bootstyle="primary")
         btn_clear_if = ttk.Button(master=frm_buttons,
                                   text="Clear",
-                                  width=5,
+                                  width=10,
                                   command=self._cb_if_clear,
                                   bootstyle="primary")
         btn_close_if = ttk.Button(master=frm_buttons,
                                   text="Close",
-                                  width=5,
+                                  width=10,
                                   command=self._cb_if_close,
                                   bootstyle="primary")
         btn_save_if.pack(side="left", padx=5, pady=5, anchor="w")
@@ -569,22 +575,44 @@ class WindowAddInterface(ttk.Toplevel):
         frm_ip.pack(padx=5, pady=5)
         frm_mac.pack(padx=5, pady=5)
         frm_type.pack(padx=5, pady=5)
-        frm_buttons.pack(padx=5, pady=5)
+        frm_buttons.pack(padx=5, pady=7)
 
     def _cb_if_save(self):
         """Callback method to save interface"""
-        input_valid = check_ip_address(self._ip_name.get()) \
-            and check_mac_address(self._mac_name.get())
+        # validate ip and mac data
+        if not (check_ip_address(self._ip_name.get()) and check_mac_address(self._mac_name.get())):
+            return
         if_type_int = [idx for idx, val in data_types.IF_TYPE.items() if val == self._type_name.get()][0]
-        if_data = data_types.InterfaceData(if_id=0,
-                                           device_id=self._if_data.device_id,
-                                           ip=self._ip_name.get(),
-                                           mac=self._mac_name.get(),
-                                           if_type=if_type_int)
-        if input_valid:
+        # import pdb; pdb.set_trace()
+
+        # if if_id=0 then add new if, else modify existing one
+        if not self._if_data.if_id:
+            # add new if
+            if_data = data_types.InterfaceData(if_id=0,
+                                               device_id=self._if_data.device_id,
+                                               ip=self._ip_name.get(),
+                                               mac=self._mac_name.get(),
+                                               if_type=if_type_int)
+            print(f" new data {if_data}")
             self.presenter.handle_save_if_data(if_data)
-            self.presenter.handle_trigger_update_if_list()
-            self._cb_if_close()
+        else:
+            # modify existing if
+            print(f"pass validation if data {self._if_data}")
+            # check for changes
+            if self._if_data.ip != self._ip_name.get() \
+                or self._if_data.mac != self._mac_name.get()\
+                or self._if_data.if_type != if_type_int:
+
+                self._if_data.ip = self._ip_name.get()
+                self._if_data.mac = self._mac_name.get()
+                self._if_data.if_type = if_type_int
+
+                print(f"modified data {self._if_data}")
+                self.presenter.handle_update_if_data(self._if_data)
+
+        self.presenter.handle_trigger_update_if_list()
+        self._cb_if_close()
+
 
     def _cb_if_close(self):
         """Callback method to close window"""
@@ -609,7 +637,7 @@ class DeviceWinManager:
         """Returns a device edit window """
         if not DeviceWinManager._device_edit_window:
             DeviceWinManager._device_edit_window = WindowDevice(presenter=presenter,
-                                                                   device_data=dev_data)
+                                                                device_data=dev_data)
         return DeviceWinManager._device_edit_window
 
     @staticmethod
@@ -628,7 +656,7 @@ class IfWinManager:
     def get_if_window(presenter, if_data):
         """Returns a device edit window """
         if not IfWinManager._if_edit_window:
-            IfWinManager._if_edit_window = WindowAddInterface(presenter=presenter,
+            IfWinManager._if_edit_window = WindowInterface(presenter=presenter,
                                                               if_data=if_data)
         return IfWinManager._if_edit_window
 
